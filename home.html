@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="./js/auth.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#46474d">
+<title>Orion 3D · Modelado, animación y desarrollo web</title>
+<meta name="description" content="Orion 3D: modelado 3D para FiveM, animación 2D y 3D, cursos, edición de video y foto, programación web y soporte en Maya, 3ds Max y Blender.">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/favicon.png">
+<link rel="stylesheet" href="css/estilos.css">
+<style>
+  /* No aplicar transform al body: alteraría el comportamiento de position: fixed en móvil. */
+  @keyframes fadeInPage {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  body {
+    animation: fadeInPage 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+</style>
+</head>
+<body data-pagina="home">
+
+<main>
+  <div class="w m">
+    <section id="hero" aria-label="Presentación"></section>
+    <section id="ventajas" class="vent-g" aria-label="Ventajas"></section>
+
+    <section class="sec" aria-labelledby="t-cats">
+      <div class="sec-t"><h2 class="calv" id="t-cats">Servicios</h2><a href="catalogo.html">Ver catálogo completo →</a></div>
+      <div class="cats-g" id="categorias"></div>
+    </section>
+
+    <section class="sec" aria-labelledby="t-pop">
+      <div class="sec-t"><h2 class="calv" id="t-pop">Servicios más pedidos</h2><a href="catalogo.html">Ver todo →</a></div>
+      <div class="carr-w">
+        <button class="fl a" type="button" aria-label="Anterior">‹</button>
+        <div class="carr" id="populares"></div>
+        <button class="fl b" type="button" aria-label="Siguiente">›</button>
+      </div>
+    </section>
+
+    <section class="sec promos" id="promos" aria-label="Promociones"></section>
+
+    <section class="sec" aria-labelledby="t-faq">
+      <div class="sec-t"><h2 class="calv" id="t-faq">Preguntas frecuentes</h2></div>
+      <div class="faq" id="faq"></div>
+    </section>
+
+    <section class="sec cta-d" aria-labelledby="t-disc">
+      <div><h2 class="calv" id="t-disc">Únase a nuestro Discord</h2><p>Allí coordinamos pedidos, cotizaciones y soporte técnico.</p></div>
+      <a class="btn" id="b-discord" target="_blank" rel="noopener">Entrar al Discord</a>
+    </section>
+  </div>
+</main>
+
+<script src="js/datos.js"></script>
+<script src="js/app.js"></script>
+<script src="js/saludo.js"></script>
+<script>
+const H=SITIO.hero;
+$("#hero").innerHTML='<div class="hero-b"><div class="hero-t"><span class="eti-r">'+esc(H.etiqueta)+'</span><h1 class="calv">'+esc(H.titulo)+'</h1><p>'+esc(H.texto)+'</p>'+
+  '<div class="cta-f"><a class="btn" href="'+H.enlace+'">'+esc(H.boton)+'</a><a class="btn o" href="'+H.enlace2+'">'+esc(H.boton2)+'</a></div></div>'+
+  '<div class="hero-img">'+media(H.img,SITIO.nombre)+'</div></div>';
+
+$("#ventajas").innerHTML=SITIO.ventajas.map(v=>'<div class="vent"><span class="ci"><svg class="i" aria-hidden="true"><use href="#i-'+v.i+'"/></svg></span><div><b>'+esc(v.t)+'</b><span>'+esc(v.d)+'</span></div></div>').join("");
+
+$("#categorias").innerHTML=CATEGORIAS.filter(c=>c.portada).map(c=>
+  '<a class="cat-card" href="catalogo.html#'+c.id+'"><div class="im">'+(c.etiqueta?'<span class="tag-i">'+esc(c.etiqueta)+'</span>':"")+media(c.img,c.nombre)+'</div>'+
+  '<div class="cb"><h3 class="calv">'+esc(c.nombre)+'</h3><p>'+esc(c.resumen)+'</p><span class="mas">Ver servicios →</span></div></a>').join("");
+
+$("#populares").innerHTML=SERVICIOS.filter(s=>s.popular).map(tarjetaServicio).join("");
+const carr=$("#populares");
+$(".fl.a").addEventListener("click",()=>carr.scrollBy({left:-540,behavior:"smooth"}));
+$(".fl.b").addEventListener("click",()=>carr.scrollBy({left:540,behavior:"smooth"}));
+
+$("#promos").innerHTML=PROMOS.map(p=>{const s=servicio(p.desdeId);
+  return '<div class="promo'+(p.rojo?" rojo":"")+'"><div><h3 class="calv">'+esc(p.titulo)+'</h3><p>'+esc(p.texto)+'</p>'+
+  (s&&s.precio!=null?'<div class="desde">Desde '+usd(s.precio)+'</div>':"")+'<a class="btn'+(p.rojo?"":" o")+'" href="'+p.enlace+'">'+esc(p.boton)+'</a></div>'+
+  '<div class="im">'+media(p.img,p.titulo)+'</div></div>';}).join("");
+
+$("#faq").innerHTML=FAQ.map(f=>'<details><summary>'+esc(f.p)+'</summary><p>'+esc(f.r)+'</p></details>').join("");
+$("#b-discord").href=SITIO.discord;
+</script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="./js/auth.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#46474d">
+<title>Carrito · Orion 3D</title>
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/favicon.png">
+<link rel="stylesheet" href="css/estilos.css">
+<style>
+  /* Desplazamiento ultra suave con la rueda del mouse en todo el sitio */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @keyframes fadeInPage {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  body {
+    animation: fadeInPage 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+
+
+  /* Corrección móvil: evita que el transform del body
+    convierta la barra fija en un elemento relativo a la página */
+  @keyframes fadeInPageMobile {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 760px) {
+    body {
+      animation: fadeInPageMobile 0.6s
+        cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    }
+  }
+
+
+.cols{display:grid;grid-template-columns:1.6fr 1fr;gap:26px;align-items:start}
+.panel h2{font-size:1.25rem;margin-bottom:16px}
+.vacio{text-align:center;padding:56px 20px}
+.vacio p{color:var(--suave);margin:10px 0 22px}
+.form-panel{margin-top:22px}
+
+.fila-p{display:grid;grid-template-columns:1fr auto auto;gap:6px 20px;align-items:center;padding:16px 0;border-bottom:1px solid var(--borde)}
+.fila-p:first-child{padding-top:0}.fila-p:last-child{border-bottom:0;padding-bottom:0}
+.fila-p h3{font-size:1.1rem;line-height:1.1}
+.fila-p .nom span{color:var(--suave);font-size:.88rem}
+.cant{display:inline-flex;align-items:center;border:1px solid var(--borde);border-radius:8px;background:var(--sup2)}
+.cant button{width:36px;height:36px;background:none;border:0;color:var(--texto);font-size:1.2rem;cursor:pointer}
+.cant button:hover{background:var(--sup3)}
+.cant output{min-width:28px;text-align:center;font-weight:700}
+.lin{min-width:96px;text-align:right}
+.quitar{grid-column:1/-1;justify-self:start;background:none;border:0;color:var(--suave);font-size:.82rem;cursor:pointer;text-decoration:underline;padding:0}
+.quitar:hover{color:var(--rojo)}
+
+label,legend{display:block;font-size:.9rem;margin-bottom:6px;color:var(--suave)}
+input[type=text]{width:100%;background:var(--sup2);border:1px solid var(--borde);border-radius:8px;color:var(--texto);padding:13px 14px}
+input[type=text]:focus{outline:0;border-color:var(--rojo)}
+input[aria-invalid=true]{border-color:var(--rojo)}
+.campo{margin-bottom:18px}
+.err{display:block;color:var(--rojo);font-size:.82rem;min-height:1em;margin-top:4px}
+.err.ok{color:#2f6b3a}
+.cupon{display:flex;gap:10px}
+.cupon .btn{padding:11px 18px}
+fieldset{border:0}
+.radios{display:flex;gap:12px}
+.radios label{flex:1;display:flex;align-items:center;gap:10px;margin:0;color:var(--texto);border:1px solid var(--borde);border-radius:8px;padding:13px 14px;cursor:pointer;background:var(--sup2)}
+.radios input{accent-color:var(--rojo);width:18px;height:18px}
+
+.resumen{position:sticky;top:72px}
+.r{display:flex;justify-content:space-between;gap:16px;padding:8px 0;color:var(--suave)}
+.r.t{border-top:1px solid var(--borde);margin-top:8px;padding-top:16px;color:var(--texto);font-size:1.3rem;font-weight:700}
+.resumen .btn{width:100%;margin-top:16px}
+.nota{color:var(--suave);font-size:.8rem;margin-top:12px}
+
+.vel2{position:fixed;inset:0;z-index:80;background:rgba(37,38,42,.75);backdrop-filter:blur(8px);display:grid;place-items:center;padding:16px}
+.caja{width:min(480px,100%);max-height:94vh;overflow:auto;background:var(--sup);border:1px solid var(--borde);border-radius:16px;padding:32px 26px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.4);animation:entra .3s cubic-bezier(.16,1,.3,1)}
+.caja.ancha{width:min(660px,100%)}
+@keyframes entra{from{opacity:0;transform:translateY(16px) scale(.95)}}
+.caja h2{font-size:1.6rem;margin:14px 0 6px}
+.caja p{color:var(--suave);font-size:.95rem}
+
+.pasos{list-style:none;text-align:left;display:grid;gap:10px;margin:22px auto 6px;max-width:360px;font-size:.9rem;color:var(--suave)}
+.pasos li{display:flex;gap:14px;align-items:center;transition:all .3s ease}
+.pasos li::before{content:"";width:20px;height:20px;flex:none;border-radius:50%;border:2px solid var(--sup3);display:grid;place-items:center;font-size:.7rem;line-height:1}
+.pasos li.act{color:var(--texto);font-weight:600;transform:translateX(4px)}
+.pasos li.act::before{border-color:var(--rojo);border-top-color:transparent;animation:girar .8s linear infinite}
+.pasos li.ok{color:var(--texto)}
+.pasos li.ok::before{content:"✓";background:#2f6b3a;border-color:#2f6b3a;color:#fff;font-weight:700}
+.pasos li.mal{color:var(--texto)}
+.pasos li.mal::before{content:"✕";background:var(--rojo);border-color:var(--rojo);color:#fff}
+
+.aro{width:74px;height:74px;border-radius:50%;border:4px solid var(--sup3);border-top-color:var(--rojo);animation:girar .9s linear infinite;margin:auto}
+@keyframes girar{to{transform:rotate(360deg)}}
+.ic{width:78px;height:78px;display:block;margin:auto;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.ic circle{stroke-dasharray:150;stroke-dashoffset:150;animation:traza .6s forwards}
+.ic path{stroke-dasharray:60;stroke-dashoffset:60;animation:traza .45s .45s forwards}
+@keyframes traza{to{stroke-dashoffset:0}}
+.ic.ok{stroke:#2f6b3a}.ic.mal{stroke:var(--rojo)}
+
+.fac{margin:16px 0 4px}
+.fac-prev{width:100%;height:auto;display:block;border-radius:8px;border:1px solid var(--borde);box-shadow:0 6px 18px rgba(37,38,42,.18)}
+.aviso-f{margin-top:12px;font-weight:700;color:var(--rojo)!important;font-size:.9rem!important}
+.aviso-f.ok{color:#2f6b3a!important}
+.acc{display:flex;gap:10px;margin-top:22px}
+.acc .btn{flex:1;padding:13px 12px}
+
+body.cerrando main,body.cerrando .cab,body.cerrando .barra-roja{transition:transform .8s cubic-bezier(.7,0,.3,1),opacity .8s,filter .8s;transform:scale(.94);opacity:.25;filter:blur(4px)}
+.cierre{position:fixed;inset:0;z-index:100;visibility:hidden;pointer-events:none}
+.cierre.on{visibility:visible;pointer-events:auto}
+.cierre .p{position:absolute;left:0;right:0;height:50.2%;background:var(--osc2);transition:transform .85s cubic-bezier(.76,0,.24,1)}
+.cierre .p1{top:0;transform:translateY(-101%);border-bottom:2px solid var(--rojo)}
+.cierre .p2{bottom:0;transform:translateY(101%);border-top:2px solid var(--rojo)}
+.cierre.on .p{transform:none}
+.cierre .cen{position:absolute;inset:0;display:grid;place-content:center;gap:16px;text-align:center;opacity:0;transition:opacity .4s .8s;padding:20px}
+.cierre.on .cen{opacity:1}
+.cen img{height:34px;margin:0 auto}
+.cen p{color:var(--claro-s)}
+.barra{width:220px;height:3px;background:rgba(255,255,255,.16);margin:0 auto;border-radius:2px;overflow:hidden}
+.barra i{display:block;height:100%;width:0;background:var(--rojo-v);transition:width 1.2s linear .9s}
+.cierre.on .barra i{width:100%}
+
+@media (max-width:900px){.cols{grid-template-columns:1fr}.resumen{position:static}}
+@media (max-width:760px){
+  .panel{padding:18px}
+  .fila-p{grid-template-columns:1fr auto}
+  .fila-p .lin{grid-column:2;grid-row:1;min-width:0}
+  .fila-p .cant{grid-column:1;justify-self:start}
+  .quitar{grid-column:2;justify-self:end}
+  .cupon{flex-direction:column}
+  .acc{flex-direction:column}
+  .caja{padding:22px 16px}
+}
+</style>
+</head>
+<body data-pagina="carrito">
+
+<main>
+  <div class="w m">
+    <section class="cab-pag"><h1 class="calv">Carrito</h1></section>
+
+    <div class="panel vacio" id="vacio" hidden>
+      <h2 class="calv">Su carrito está vacío</h2>
+      <p>Elija los servicios que necesita en el catálogo.</p>
+      <a class="btn" href="catalogo.html">Ver catálogo</a>
+    </div>
+
+    <div class="cols" id="cols" hidden>
+      <section>
+        <div class="panel"><h2 class="calv">Servicios elegidos</h2><div id="lista"></div></div>
+
+        <form class="panel form-panel" id="form" novalidate>
+          <h2 class="calv">Datos del pedido</h2>
+          <div class="campo"><label for="nombre">Nombre</label>
+            <input type="text" id="nombre" autocomplete="name"><span class="err" id="e-nombre"></span></div>
+          <div class="campo"><label for="discord">Usuario de Discord</label>
+            <input type="text" id="discord" autocomplete="off" autocapitalize="none" placeholder="usuario"><span class="err" id="e-discord"></span></div>
+          <div class="campo"><label for="cupon">Cupón de descuento (opcional)</label>
+            <div class="cupon"><input type="text" id="cupon" autocomplete="off" autocapitalize="characters" placeholder="Indica un cupon correcto"><button type="button" class="btn o" id="aplicar">Aplicar</button></div>
+            <span class="err" id="msg-cupon" role="status"></span></div>
+          <fieldset class="campo"><legend>¿Ya es cliente de Orion 3D?</legend>
+            <div class="radios"><label><input type="radio" name="cli" value="no"> No</label><label><input type="radio" name="cli" value="si"> Sí</label></div>
+            <span class="err" id="e-cli"></span></fieldset>
+        </form>
+      </section>
+
+      <aside class="panel resumen" aria-label="Resumen del pedido">
+        <h2 class="calv">Resumen</h2>
+        <div class="r"><span>Subtotal</span><span id="r-sub"></span></div>
+        <div class="r" id="r-desc-f" hidden><span id="r-desc-n"></span><span id="r-desc"></span></div>
+        <div class="r t"><span>Total</span><span id="r-total"></span></div>
+        <p class="nota" id="nota-desde" hidden>Los servicios marcados «desde» parten de ese precio y pueden variar según el proyecto.</p>
+        <button class="btn" type="submit" form="form">Continuar al pago</button>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<!-- Modal interactivo con botón de confirmación previo y animación -->
+<div class="vel2" id="modal" hidden>
+  <div class="caja" id="caja" role="dialog" aria-modal="true" aria-labelledby="m-tit" tabindex="-1">
+    <div id="estado"></div>
+    <h2 class="calv" id="m-tit"></h2>
+    <p id="m-txt" aria-live="polite"></p>
+    <ul class="pasos" id="pasos" hidden></ul>
+    <div class="fac" id="m-fac" hidden></div>
+    <p class="aviso-f" id="m-aviso" hidden></p>
+    <div class="acc" id="m-acc"></div>
+  </div>
+</div>
+
+<div class="cierre" id="cierre" aria-hidden="true">
+  <div class="p p1"></div><div class="p p2"></div>
+  <div class="cen"><img src="img/logo-orion.png" alt=""><p>Abriendo Discord…</p><div class="barra"><i></i></div></div>
+</div>
+
+<script src="js/datos.js"></script>
+<script src="js/app.js"></script>
+<script src="js/factura.js"></script>
+<script src="js/saludo.js"></script>
+<script>
+let cuponInfo=null, puedeCerrar=false, descargada=false;
+const filas=()=>Carrito.get().map(l=>({p:servicio(l.id),cant:l.cant||1})).filter(f=>f.p&&f.p.precio!=null);
+
+function tot(){
+  const subC=filas().reduce((s,f)=>s+Math.round(f.p.precio*100)*f.cant,0);
+  const pct=cuponInfo?cuponInfo.pct:0; 
+  const descC=Math.round(subC*pct/100);
+  return {subC,pct,descC,totC:subC-descC,desde:filas().some(f=>f.p.desde)};
+}
+
+function datos(){
+  const r=$("input[name=cli]:checked");
+  return {nombre:$("#nombre").value.trim(), ds:norm($("#discord").value), cli:r?r.value:""};
+}
+
+const esCliente=ds=>{
+  if(!window.CLIENTES || !Array.isArray(window.CLIENTES)) return false;
+  return window.CLIENTES.some(c => 
+    norm(c.discord) === norm(ds) || 
+    norm(c.nombre) === norm(ds) ||
+    (c.usuario && norm(c.usuario) === norm(ds))
+  );
+};
+
+function pintar(){
+  const fs=filas(), t=tot();
+  $("#vacio").hidden=fs.length>0; $("#cols").hidden=fs.length===0;
+  $("#lista").innerHTML=fs.map(({p,cant})=>
+    '<article class="fila-p"><div class="nom"><h3 class="calv">'+esc(p.nombre)+'</h3><span>'+(p.desde?"Desde ":"")+usd(p.precio)+'</span></div>'+
+    '<div class="cant" role="group" aria-label="Cantidad de '+esc(p.nombre)+'"><button type="button" data-a="menos" data-id="'+p.id+'" aria-label="Quitar una unidad">−</button><output>'+cant+'</output><button type="button" data-a="mas" data-id="'+p.id+'" aria-label="Añadir una unidad">+</button></div>'+
+    '<strong class="lin">'+usd(p.precio*cant)+'</strong>'+
+    '<button type="button" class="quitar" data-a="quitar" data-id="'+p.id+'">Eliminar</button></article>').join("");
+  $("#r-sub").textContent=usdC(t.subC);
+  $("#r-desc-f").hidden=!cuponInfo;
+  if(cuponInfo){$("#r-desc-n").textContent="Cupón ("+cuponInfo.codigo+") (−"+cuponInfo.pct+"%)";$("#r-desc").textContent="−"+usdC(t.descC);}
+  $("#r-total").textContent=usdC(t.totC);
+  $("#nota-desde").hidden=!t.desde;
+}
+
+$("#lista").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-a]"); if(!b) return;
+  let c=Carrito.get(); const l=c.find(x=>x.id===b.dataset.id); if(!l) return;
+  if(b.dataset.a==="mas") l.cant=(l.cant||1)+1; else if(b.dataset.a==="menos") l.cant=(l.cant||1)-1; else l.cant=0;
+  Carrito.set(c.filter(x=>x.cant>0)); pintar(); Anim.observar($("#lista"));
+});
+
+/* --- LÓGICA DE CUPONES LIBRES (ORIONFREE50, ORIONFREE20, ORIONFREE5 o personalizados) --- */
+function aplicarCupon(){
+  const cod=$("#cupon").value.trim().toUpperCase(), m=$("#msg-cupon");
+  if(!cod){
+    cuponInfo=null; m.textContent=""; m.className="err"; pintar(); return true;
+  }
+  
+  let pct = 0;
+  if(cod === "ORIONFREE50") pct = 50;
+  else if(cod === "ORIONFREE20") pct = 20;
+  else if(cod === "ORIONFREE5") pct = 5;
+  else if(cod.includes("50")) pct = 50;
+  else if(cod.includes("20")) pct = 20;
+  else if(cod.includes("5")) pct = 5;
+  else {
+    // Si escribe cualquier otro cupón por defecto le asignamos 10% o le leemos si existe en CUPONES de datos.js
+    pct = (window.CUPONES && window.CUPONES[cod]) ? window.CUPONES[cod].pct : 15;
+  }
+
+  cuponInfo = { codigo: cod, pct: pct };
+  m.textContent = "¡Cupón " + cod + " aplicado con éxito (" + pct + "% de descuento)!";
+  m.className = "err ok";
+  pintar();
+  return true;
+}
+
+$("#aplicar").addEventListener("click", aplicarCupon);
+
+function err(id,msg){const i=$("#"+id);$("#e-"+id).textContent=msg;if(i&&i.tagName==="INPUT")i.setAttribute("aria-invalid",msg?"true":"false");return !msg;}
+
+$("#form").addEventListener("submit",e=>{
+  e.preventDefault(); if(!filas().length) return;
+  const d=datos(); let ok=true;
+  ok=err("nombre",d.nombre.length<2?"Escriba su nombre.":"")&&ok;
+  ok=err("discord",/^[a-z0-9._]{2,32}$/.test(d.ds)?"":"Escriba un usuario de Discord válido (letras, números, punto o guion bajo).")&&ok;
+  ok=err("cli",d.cli?"":"Indique si ya es cliente.")&&ok;
+  aplicarCupon();
+  if(ok) mostrarConfirmacion(d); else {const p=$("[aria-invalid=true]");if(p)p.focus();}
+});
+
+function estado(t){
+  $("#estado").innerHTML=t==="spin"?'<div class="aro"></div>':t==="x"||t==="ok"?
+    '<svg class="ic '+(t==="ok"?"ok":"mal")+'" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="23"/>'+(t==="ok"?'<path d="M15 27l8 8 15-17"/>':'<path d="M18 18l16 16M34 18L18 34"/>')+"</svg>":"";
+}
+
+function reiniciarModal(){
+  $("#caja").classList.remove("ancha"); $("#pasos").hidden=true; $("#m-fac").hidden=true; $("#m-fac").innerHTML="";
+  $("#m-aviso").hidden=true; $("#m-acc").innerHTML="";
+}
+
+/* --- PASO 1: BOTÓN DE CONFIRMACIÓN PREVIO ANTES DE LA VERIFICACIÓN --- */
+function mostrarConfirmacion(d){
+  puedeCerrar=true; reiniciarModal(); $("#modal").hidden=false; estado("");
+  $("#m-tit").textContent="Confirmación de Compra";
+  $("#m-txt").textContent="Has empezado la verificación de compra. Confirma si quieres seguir con el proceso.";
+  $("#m-acc").innerHTML='<button class="btn o" type="button" id="b-cancelar">Cancelar</button><button class="btn" type="button" id="b-seguir-val">Sí, continuar</button>';
+  
+  $("#b-cancelar").onclick=cerrarModal;
+  $("#b-seguir-val").onclick=()=>iniciarValidacion(d);
+  $("#b-seguir-val").focus();
+}
+
+/* --- PASO 2: ANIMACIÓN DE VERIFICACIÓN DE 6 PASOS --- */
+function iniciarValidacion(d){
+  const pasos=[
+    "Verificando integridad de sesión y carrito",
+    "Analizando formato de datos del usuario",
+    "Comprobando base de datos de clientes",
+    "Aplicando código de cupón y descuentos",
+    "Calculando totales finales de la orden",
+    "Preparando factura y pasarela digital"
+  ];
+  
+  d.rechazo = (d.cli === "si" && !esCliente(d.ds)) || (d.cli === "si" && !esCliente(d.nombre));
+  
+  puedeCerrar=false; reiniciarModal(); $("#pasos").hidden=false; estado("spin");
+  $("#m-tit").textContent="Procesando pedido"; $("#m-txt").textContent="Por favor, espere mientras validamos su información.";
+  $("#pasos").innerHTML=pasos.map(p=>"<li>"+p+"</li>").join("");
+  $("#caja").focus();
+  
+  const lis=[...$("#pasos").children]; let i=0;
+  (function sig(){
+    if(i>0) lis[i-1].className=(i===3 && d.rechazo)?"mal":"ok";
+    if(i<lis.length){
+      lis[i].className="act"; 
+      i++; 
+      setTimeout(sig, sinMov ? 100 : 650);
+    } else {
+      setTimeout(()=>fin(d), sinMov ? 0 : 400);
+    }
+  })();
+}
+
+function fin(d){
+  puedeCerrar=true;
+  if(d.rechazo){
+    estado("x"); $("#m-tit").textContent="Verificación de cliente fallida";
+    $("#m-txt").textContent="Indicó que ya era cliente, pero no encontramos su usuario o nombre registrado en el sistema. Si es su primera vez, seleccione «No».";
+    $("#m-acc").innerHTML='<button class="btn" type="button" id="b-volver">Volver y corregir</button>';
+    $("#b-volver").onclick=cerrarModal; $("#b-volver").focus();
+  } else {
+    mostrarFactura(d);
+  }
+}
+
+function cerrarModal(){$("#modal").hidden=true;$("#nombre").focus();}
+addEventListener("keydown",e=>{if(e.key==="Escape"&&puedeCerrar&&!$("#modal").hidden)cerrarModal();});
+
+async function mostrarFactura(d){
+  const t=tot();
+  const p={numero:Factura.numero(),fecha:new Date(),nombre:d.nombre,discord:d.ds,cliente:d.cli==="si",cupon:cuponInfo?cuponInfo.codigo:null,pct:t.pct,
+    lineas:filas().map(f=>({nombre:f.p.nombre,cant:f.cant,unitC:Math.round(f.p.precio*100),desde:!!f.p.desde})),
+    subC:t.subC,descC:t.descC,totC:t.totC};
+  const c=await Factura.crear(p);
+  descargada=false;
+  $("#caja").classList.add("ancha"); estado("ok");
+  $("#m-tit").textContent="¡Validación exitosa!";
+  $("#m-txt").textContent="Su orden ha sido procesada correctamente."+(d.cli==="si"?" Cuenta de cliente verificada.":"");
+  $("#pasos").hidden=true;
+  const f=$("#m-fac"); f.hidden=false; f.innerHTML=""; c.className="fac-prev"; c.setAttribute("role","img"); c.setAttribute("aria-label","Vista previa de la factura "+p.numero); f.appendChild(c);
+  const av=$("#m-aviso"); av.hidden=false; av.className="aviso-f"; av.textContent="Debe descargar la factura para poder continuar a Discord.";
+  $("#m-acc").innerHTML='<button class="btn o" type="button" id="b-volver">Modificar</button><button class="btn" type="button" id="b-desc">Descargar factura</button><button class="btn" type="button" id="b-seguir" disabled>Continuar a Discord</button>';
+  $("#b-volver").onclick=cerrarModal;
+  $("#b-desc").onclick=()=>c.toBlob(b=>{
+    if(!b){av.textContent="No se pudo generar el archivo. Intente de nuevo.";return;}
+    const u=URL.createObjectURL(b),a=document.createElement("a");
+    a.href=u;a.download="Factura-"+p.numero+".png";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);
+    descargada=true;$("#b-seguir").disabled=false;av.className="aviso-f ok";av.textContent="¡Factura descargada! Ya puede continuar a Discord.";$("#b-seguir").focus();
+  },"image/png");
+  $("#b-seguir").onclick=()=>{if(descargada)enviar(p);};
+  $("#b-desc").focus();
+}
+
+function enviar(p){
+  try{localStorage.setItem("orion_pedido",JSON.stringify({numero:p.numero,nombre:p.nombre,discord:p.discord,total:usdC(p.totC)}));}catch(e){}
+  $("#modal").hidden=true;
+  document.body.classList.add("cerrando");
+  $("#cierre").classList.add("on");
+  setTimeout(()=>{Carrito.set([]);location.href=SITIO.discord;},sinMov?500:2500);
+}
+
+pintar();
+</script>
+</body>
+</html>

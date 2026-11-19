@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#3b3c41">
+<title>Orion 3D | Ingresar</title>
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/favicon.png">
+<script src="js/auth.js"></script>
+<style>
+  :root{--paper:#f7faf0;--mist:#e8f3da;--leaf:#5aa469;--forest:#1f4d2e;--deep:#163823;--sun:#f2c230;--cream:#fff6cc;--line:#d5e4c6;--muted:#5c7262;--bad:#b3402f;--ok:#2f7d46;font-family:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif}
+  *{box-sizing:border-box;margin:0}
+  html,body{min-height:100%}
+  body{background:var(--paper);color:var(--deep);overflow-x:hidden}
+  .shell{display:grid;grid-template-columns:1.05fr .95fr;min-height:100vh}
+
+  /* Panel institucional */
+  .brand{position:relative;overflow:hidden;color:#fff;padding:44px 56px;display:flex;flex-direction:column;justify-content:space-between;gap:28px;
+    background:radial-gradient(circle at 12% 8%,#2f7d46 0%,transparent 45%),radial-gradient(circle at 92% 92%,#2b6a3d 0%,transparent 50%),var(--deep)}
+  .brand::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1.2px,transparent 1.2px);background-size:26px 26px;animation:pan 30s linear infinite}
+  @keyframes pan{to{background-position:260px 260px}}
+  .rings{position:absolute;right:-160px;top:50%;width:560px;height:560px;margin-top:-280px;pointer-events:none}
+  .rings i{position:absolute;inset:0;border:1.5px solid rgba(242,194,48,.4);border-radius:50%;animation:ring 8s ease-out infinite}
+  .rings i:nth-child(2){animation-delay:2.7s}.rings i:nth-child(3){animation-delay:5.4s}
+  @keyframes ring{from{transform:scale(.2);opacity:.9}to{transform:scale(1);opacity:0}}
+  .b-top,.b-mid,.b-foot{position:relative;z-index:1}
+  .b-top{display:flex;align-items:center;gap:14px;animation:fadeup .8s both}
+  .emblem{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:14px;padding:6px;box-shadow:0 8px 20px rgba(0,0,0,.25);animation:bob 5s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-5px)}}
+  .b-top strong{display:block;font-family:Arial,Helvetica,sans-serif;font-size:1.1rem;letter-spacing:.2px}
+  .b-top span{font-size:.82rem;color:var(--cream);opacity:.85}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sun);animation:fadeup .8s .15s both}
+  .eyebrow::before{content:"";width:28px;height:2px;background:var(--sun)}
+  .b-mid h2{font-family:Arial,Helvetica,sans-serif;font-size:clamp(2rem,3.4vw,3.1rem);line-height:1.1;margin:14px 0 14px;max-width:560px;animation:fadeup .9s .25s both}
+  .b-mid h2 em{font-style:normal;background:linear-gradient(var(--sun),var(--sun)) 0 94%/0 .13em no-repeat;animation:under 1.2s 1.1s forwards}
+  @keyframes under{to{background-size:100% .13em}}
+  .lead{max-width:470px;color:#dcebd5;line-height:1.55;animation:fadeup .9s .4s both}
+  .quotes{position:relative;height:3.4em;margin-top:26px;max-width:460px}
+  .quotes p{position:absolute;inset:0;font-family:Arial,Helvetica,sans-serif;font-size:1.12rem;font-style:italic;color:var(--cream);opacity:0;animation:q 15s infinite;padding-left:16px;border-left:3px solid var(--sun)}
+  .quotes p:nth-child(2){animation-delay:5s}.quotes p:nth-child(3){animation-delay:10s}
+  @keyframes q{0%{opacity:0;transform:translateY(12px)}5%,30%{opacity:1;transform:none}35%,100%{opacity:0;transform:translateY(-12px)}}
+  .stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+  .stat{min-width:112px;padding:14px 18px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(4px);animation:fadeup .8s both;transition:transform .3s,background .3s}
+  .stat:nth-child(1){animation-delay:.6s}.stat:nth-child(2){animation-delay:.75s}.stat:nth-child(3){animation-delay:.9s}
+  .stat:hover{transform:translateY(-5px);background:rgba(255,255,255,.14)}
+  .stat b{display:block;font-family:Arial,Helvetica,sans-serif;font-size:1.9rem;color:var(--sun);line-height:1}
+  .stat span{font-size:.78rem;color:#dcebd5}
+  .b-foot{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:#bcd3b6}
+  @keyframes fadeup{from{opacity:0;transform:translateY(22px)}}
+
+  /* Lado del acceso */
+  .side{position:relative;display:grid;place-items:center;padding:32px 20px;overflow:hidden;background:linear-gradient(160deg,var(--paper),#eef6e0 55%,var(--cream) 140%)}
+  #blobs{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  #blobs span{position:absolute;border-radius:50%;animation:drift var(--d) ease-in-out var(--delay) infinite alternate}
+  @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(var(--x),var(--y)) scale(1.18)}}
+
+  .login{position:relative;z-index:1;width:min(100%,430px);background:#fff;border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 28px 70px rgba(31,77,46,.18);animation:enter .9s cubic-bezier(.2,.9,.3,1) both}
+  @keyframes enter{from{transform:translateX(50px);opacity:0}}
+  .login.shake{animation:shake .45s}
+  @keyframes shake{20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+  .top{background:linear-gradient(180deg,var(--mist),#f4f9ea);padding:20px 0 0;text-align:center}
+  .plant{width:140px;height:150px;display:block;margin:0 auto;overflow:visible}
+  .bar{height:5px;background:var(--line);margin-top:6px}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--leaf),var(--sun));transition:width .7s cubic-bezier(.3,1,.4,1)}
+
+  .body{padding:22px 30px 22px}
+  .tag{display:block;text-align:center;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--leaf);margin-bottom:4px}
+  h1{font-family:Arial,Helvetica,sans-serif;font-size:1.7rem;font-weight:700;color:var(--forest);text-align:center;line-height:1.15}
+  .sub{text-align:center;color:var(--muted);margin:6px 0 18px;font-size:.93rem}
+  .rise{animation:fadeup .7s cubic-bezier(.2,.9,.3,1) both;animation-delay:calc(var(--i) * .09s + .45s)}
+  label{display:block;font-weight:700;font-size:.88rem;margin-bottom:6px;color:var(--forest)}
+  .field{margin-bottom:12px}
+  input{width:100%;font:inherit;font-size:1rem;color:var(--deep);background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;outline:none;transition:border-color .25s,box-shadow .25s,background .25s}
+  input::placeholder{color:#93a798}
+  input:focus{border-color:var(--leaf);background:#fff;box-shadow:0 0 0 4px rgba(90,164,105,.18)}
+  input.ok{border-color:var(--ok)}input.bad{border-color:var(--bad)}
+  .hint{min-height:1.3em;margin-top:5px;font-size:.82rem;color:var(--muted)}
+  .hint.ok{color:var(--ok)}.hint.bad{color:var(--bad)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .chip{font-size:.74rem;font-weight:700;padding:3px 11px;border-radius:999px;border:1.5px solid var(--c);color:var(--c);opacity:.6;transition:all .35s cubic-bezier(.3,1.6,.5,1)}
+  .chip.on{background:var(--c);color:var(--t);opacity:1;transform:scale(1.1)}
+
+  /* Tipo de visitante (aparece solo con rol Visitante) */
+  .tipo-box{max-height:0;opacity:0;overflow:hidden;padding:0 4px;transform:translateY(-8px);transition:max-height .55s ease,opacity .4s,transform .4s,margin .4s}
+  .tipo-box.show{max-height:150px;opacity:1;transform:none;margin-bottom:12px}
+
+  /* Acceso admin (oculto) */
+  button.ready.adm,button.checking.adm,button.verified.adm{background:linear-gradient(90deg,#7b2ff7,#f107a3)}
+  button.ready.adm{box-shadow:0 10px 24px rgba(241,7,163,.35)}
+  button.checking.adm::before{background:#fff}
+  .welcome.admin{background:linear-gradient(135deg,#1a0b3d,#7b2ff7 55%,#f107a3)}
+
+  /* Acceso Founder (Juan MaldonadoAdmin) */
+  button.ready.founder,button.checking.founder,button.verified.founder{background:linear-gradient(90deg,#000000,#7b2ff7,#c0151f);border:1px solid #f107a3;}
+  button.ready.founder{box-shadow:0 10px 24px rgba(123,47,247,.45)}
+  .welcome.founder{background:radial-gradient(circle at 50% 50%,#7b2ff7 0%,#000000 80%)}
+
+  /* Preguntas de seguridad (admin) */
+  .sec{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 30%,rgba(123,47,247,.55),rgba(10,4,25,.93));backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
+  .sec.show{opacity:1;visibility:visible}
+  .sec-card{width:min(100%,450px);padding:28px;border-radius:24px;background:linear-gradient(160deg,#241046,#12082b);border:1px solid rgba(241,7,163,.5);box-shadow:0 0 60px rgba(241,7,163,.3),0 30px 80px rgba(0,0,0,.5);color:#fff;transform:translateY(40px) scale(.92) rotate(-2deg);transition:transform .6s cubic-bezier(.2,1.4,.4,1)}
+  .sec.show .sec-card{transform:none}
+  .sec-card.shake{animation:shake .45s}
+  .sec-ico{font-size:2.4rem;text-align:center;animation:bob2 2.4s ease-in-out infinite}
+  @keyframes bob2{50%{transform:translateY(-6px) rotate(6deg)}}
+  .sec h3{font-family:Arial,Helvetica,sans-serif;text-align:center;font-size:1.4rem;margin:4px 0}
+  .sec-sub{text-align:center;color:#c7b8ee;font-size:.9rem;margin-bottom:16px}
+  .sec label{color:#f0e8ff;font-size:.9rem;font-weight:600;margin-bottom:12px;opacity:0;transform:translateX(-18px)}
+  .sec label span{display:block;margin-bottom:6px}
+  .sec.show label{animation:sqin .5s forwards;animation-delay:calc(var(--i) * .12s + .3s)}
+  @keyframes sqin{to{opacity:1;transform:none}}
+  .sec input{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff}
+  .sec input::placeholder{color:#8b7bb8}
+  .sec input:focus{background:rgba(255,255,255,.12);border-color:#f107a3;box-shadow:0 0 0 4px rgba(241,7,163,.25)}
+  .sec-msg{min-height:1.4em;text-align:center;font-size:.86rem;color:#ff8fb8;margin:2px 0 10px}
+  .sec-msg.ok{color:#6cf2b0}
+  .sec-acts{display:flex;gap:10px}
+  .sec-acts button{width:auto;flex:1}
+  .sec-go{background:linear-gradient(90deg,#7b2ff7,#f107a3);color:#fff;box-shadow:0 10px 24px rgba(241,7,163,.3)}
+  .sec-cancel{background:rgba(255,255,255,.1);color:#fff}
+  .sec-go:disabled{opacity:.5;cursor:not-allowed}
+
+  /* PIN de los clientes (nube) */
+  .tipo-box.alto.show{max-height:240px}
+  .pin-wrap{position:relative}
+  input.pin-in{text-align:center;font-size:1.35rem;font-weight:700;letter-spacing:.55em;padding-left:calc(14px + .55em)}
+  .relink{width:auto;margin-top:6px;padding:0;background:none;border:0;border-radius:0;box-shadow:none;color:var(--leaf);font-size:.82rem;font-weight:700;text-decoration:underline;cursor:pointer}
+  .relink:hover,.relink:active{transform:none;color:var(--forest)}
+  .nube{position:absolute;right:4px;bottom:calc(100% - 2px);z-index:5;min-width:176px;padding:14px 26px 12px;border-radius:46px;background:#fff;color:var(--forest);text-align:center;pointer-events:none;
+    opacity:0;transform:translateY(14px) scale(.6);transform-origin:80% 100%;transition:opacity .35s,transform .5s cubic-bezier(.3,1.6,.5,1);filter:drop-shadow(0 8px 14px rgba(31,77,46,.32))}
+  .nube::before,.nube::after,.nube i{content:"";position:absolute;background:#fff;border-radius:50%}
+  .nube::before{width:48px;height:48px;top:-22px;left:24px}
+  .nube::after{width:64px;height:64px;top:-34px;right:26px}
+  .nube i:nth-of-type(1){width:15px;height:15px;right:34px;bottom:-14px}
+  .nube i:nth-of-type(2){width:8px;height:8px;right:22px;bottom:-27px}
+  .nube small{display:block;font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+  .nube strong{display:block;font-family:Arial,Helvetica,sans-serif;font-size:2rem;letter-spacing:.3em;margin:2px 0 8px .3em;color:var(--forest)}
+  .nube b{display:block;height:4px;border-radius:4px;background:linear-gradient(90deg,var(--sun),var(--leaf));transform-origin:left}
+  .nube.show{opacity:1;transform:none;animation:flota 3s ease-in-out .5s infinite}
+  .nube.show b{animation:cuenta 5s linear forwards}
+  @keyframes flota{50%{transform:translateY(-6px)}}
+  @keyframes cuenta{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+  /* Bloqueo por intentos fallidos */
+  .lock{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 30%,rgba(179,64,47,.55),rgba(12,22,16,.96));backdrop-filter:blur(10px);opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
+  .lock.show{opacity:1;visibility:visible}
+  .lock-card{position:relative;width:min(100%,420px);padding:34px 28px 28px;border-radius:26px;text-align:center;color:#fff;background:linear-gradient(160deg,#2a1713,#150c0a);border:1px solid rgba(255,107,107,.5);box-shadow:0 0 70px rgba(255,80,80,.28),0 30px 80px rgba(0,0,0,.55);transform:scale(.9) translateY(30px);transition:transform .6s cubic-bezier(.2,1.4,.4,1)}
+  .lock.show .lock-card{transform:none}
+  .lock-ring{width:170px;height:170px;display:block;margin:0 auto;transform:rotate(-90deg);overflow:visible}
+  .lock.show .lock-ring{animation:lpulse 2s ease-in-out infinite}
+  @keyframes lpulse{50%{transform:rotate(-90deg) scale(1.04)}}
+  .lock-ring circle{fill:none;stroke-width:7;stroke-linecap:round}
+  .lock-ring .bg{stroke:rgba(255,255,255,.12)}
+  .lock-ring .fg{stroke:#ff6b6b;stroke-dasharray:326.7;stroke-dashoffset:0;filter:drop-shadow(0 0 8px rgba(255,107,107,.7));transition:stroke-dashoffset .25s linear}
+  .lock-time{position:absolute;left:0;right:0;top:94px;font-family:Arial,Helvetica,sans-serif;font-size:2.6rem;font-weight:700;font-variant-numeric:tabular-nums}
+  .lock h3{font-family:Arial,Helvetica,sans-serif;font-size:1.45rem;margin:18px 0 6px}
+  .lock p{color:#e8c9c3;font-size:.93rem;line-height:1.5}
+  .lock.profundo{background:#000;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .lock.profundo .lock-card{background:#040404;border-color:rgba(255,255,255,.1);box-shadow:none}
+  .lock.profundo.show .lock-ring{animation:none}
+  .lock.profundo .lock-ring .bg{stroke:rgba(255,255,255,.07)}
+  .lock.profundo .lock-ring .fg{stroke:#555;filter:none}
+  .lock.profundo .lock-time{color:#bdbdbd}
+  .lock.profundo h3{color:#cfcfcf}
+  .lock.profundo p{color:#7a7a7a}
+  .apin-dots{display:flex;justify-content:center;gap:8px;margin:2px 0 8px}
+  .apin-dots i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .4s cubic-bezier(.3,1.6,.5,1)}
+  .apin-dots i.on{background:#f107a3;box-shadow:0 0 12px #f107a3;transform:scale(1.3)}
+
+  button{position:relative;overflow:hidden;width:100%;font:inherit;font-weight:700;font-size:1.02rem;color:var(--deep);background:#cfe0c4;border:0;border-radius:12px;padding:14px;cursor:pointer;transition:background .4s,color .4s,transform .15s,box-shadow .3s}
+  button.ready{background:var(--forest);color:#fff;box-shadow:0 10px 22px rgba(31,77,46,.28)}
+  button.ready::after{content:"";position:absolute;inset:0 auto 0 -60%;width:40%;background:linear-gradient(100deg,transparent,rgba(242,194,48,.55),transparent);transform:skewX(-20deg);animation:shine 2.6s ease-in-out infinite}
+  @keyframes shine{0%,40%{left:-60%}100%{left:130%}}
+  button:hover{transform:translateY(-2px)}button:active{transform:scale(.98)}
+  button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+  button .spin{display:none;width:16px;height:16px;margin-right:10px;vertical-align:-3px;border:2.5px solid rgba(255,255,255,.35);border-top-color:var(--sun);border-radius:50%;animation:girar .8s linear infinite}
+  button.checking{background:var(--forest);color:#fff;cursor:progress;transform:none}
+  button.checking .spin{display:inline-block}
+  button.checking::after{display:none}
+  button.checking::before{content:"";position:absolute;left:0;bottom:0;height:4px;width:var(--p,0%);background:var(--sun);transition:width .95s linear}
+  button.verified{background:var(--ok);color:#fff}
+  button.denied{background:var(--bad);color:#fff;animation:shake .45s}
+  #btnlabel.fade{display:inline-block;animation:aparece .4s ease both}
+  @keyframes girar{to{transform:rotate(360deg)}}
+  @keyframes aparece{from{opacity:0;transform:translateY(6px)}}
+  .privacy{font-size:.75rem;line-height:1.5;color:var(--muted);margin-top:14px;text-align:center}
+
+  /* Bienvenida */
+  .welcome{position:fixed;inset:0;z-index:10;display:grid;place-items:center;text-align:center;padding:24px;background:var(--forest);color:#fff;clip-path:circle(0% at 70% 40%);pointer-events:none}
+  .welcome.show{clip-path:circle(150% at 70% 40%);transition:clip-path 1.1s cubic-bezier(.7,0,.3,1);pointer-events:auto}
+  .welcome h2{font-family:Arial,Helvetica,sans-serif;font-size:clamp(1.8rem,6vw,3rem);line-height:1.15}
+  .welcome p{font-size:1.15rem;margin-top:12px;color:var(--cream)}
+  .welcome .dots{margin-top:10px;color:var(--sun)}
+  .welcome .dots span{display:inline-block;font-size:2.2rem;animation:dot 1s infinite}
+  .welcome .dots span:nth-child(2){animation-delay:.2s}.welcome .dots span:nth-child(3){animation-delay:.4s}
+  @keyframes dot{50%{transform:translateY(-9px)}}
+
+  @media (max-width:900px){
+    .shell{grid-template-columns:1fr}
+    .brand{padding:24px 22px;gap:14px}
+    .b-mid h2{font-size:1.55rem;margin:8px 0 0}
+    .lead,.quotes,.stats,.rings,.vine,.eyebrow{display:none}
+    .b-foot{display:none}
+    .side{padding:26px 16px 40px}
+  }
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.quotes p:first-child{opacity:1}}
+
+  /* =====================  TEMA ORION 3D (gris + rojo)  ===================== */
+  @font-face{font-family:"Calvera";src:url("fonts/calvera.woff2") format("woff2"),url("fonts/calvera.ttf") format("truetype"),url("fonts/calvera.otf") format("opentype");font-display:swap}
+  :root{--paper:#d6d7db;--mist:#c9cacf;--leaf:#c0151f;--forest:#3b3c41;--deep:#25262a;--sun:#e6d6b8;--cream:#ececef;--line:#bdbec3;--muted:#5a5b62;--bad:#b3141d;--ok:#2f6b3a;--calv:"Calvera","Impact","Arial Black",Arial,sans-serif;font-family:Arial,Helvetica,sans-serif}
+  body{background:#cfd0d4}
+  #fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .shell{position:relative;z-index:1}
+  h1,.b-mid h2,.welcome h2,.sec h3,.lock h3{font-family:var(--calv);font-weight:400;text-transform:uppercase;letter-spacing:.03em}
+  h1{color:#25262a;font-size:1.9rem}
+  .b-mid h2{font-size:clamp(2.1rem,3.8vw,3.4rem);line-height:1.02}
+  .sec h3,.lock h3{font-size:1.5rem}
+  .brand{background:radial-gradient(circle at 12% 8%,rgba(192,21,31,.38) 0%,transparent 45%),radial-gradient(circle at 92% 92%,rgba(192,21,31,.22) 0%,transparent 50%),#3b3c41}
+  .b-top .logo{height:38px;width:auto;display:block;animation:bob 5s ease-in-out infinite}
+  .b-top span{color:var(--sun)}
+  .lead,.stat span{color:#d9d9dd}.b-foot{color:#c9cace}
+  .b-mid h2 em{background:linear-gradient(var(--leaf),var(--leaf)) 0 94%/0 .13em no-repeat;animation:under 1.2s 1.1s forwards;color:#fff}
+  .side{background:linear-gradient(160deg,#d9dadd,#cfd0d4 55%,#e2e3e7 140%)}
+  .login{background:#e2e3e7;border-color:var(--line);box-shadow:0 28px 70px rgba(37,38,42,.28)}
+  .top{background:linear-gradient(180deg,#d6d7db,#e2e3e7)}
+  input:focus{background:#ececef;box-shadow:0 0 0 4px rgba(192,21,31,.18)}
+  input::placeholder{color:#8c8d94}
+  .bar{background:var(--line)}
+  .plant{width:150px;height:150px;display:block;margin:0 auto;overflow:visible}
+  .plant polygon{fill:#c3c4c9;stroke:#46474d;stroke-width:3;stroke-linejoin:round;transition:fill .7s,stroke .7s}
+  .plant .cb{transform-box:fill-box;transform-origin:center;transform:scale(.8) rotate(-8deg);transition:transform .9s cubic-bezier(.3,1.5,.5,1)}
+  .plant .sh{fill:rgba(37,38,42,.18)}
+  .plant.s1 .cb{transform:scale(.92)}
+  .plant.s1 .fl{fill:#8a8b92}.plant.s1 .fr{fill:#5a5b62}
+  .plant.s2 .cb{transform:scale(1);animation:flotaC 3.4s ease-in-out infinite}
+  .plant.s2 .ft{fill:#e0323d}.plant.s2 .fl{fill:#c0151f}.plant.s2 .fr{fill:#8f0f18}
+  .plant.adm.s2 .ft{fill:#c084fc}.plant.adm.s2 .fl{fill:#7b2ff7}.plant.adm.s2 .fr{fill:#f107a3}
+  .plant.founder.s2 .ft{fill:#ff4d4d}.plant.founder.s2 .fl{fill:#7b2ff7}.plant.founder.s2 .fr{fill:#000000}
+  .sp{fill:var(--sun);opacity:0}
+  .plant.s2 .sp{animation:subir 2.6s ease-out infinite}
+  .plant.s2 .sp:nth-of-type(2){animation-delay:.8s}.plant.s2 .sp:nth-of-type(3){animation-delay:1.6s}
+  @keyframes flotaC{50%{transform:scale(1) translateY(-6px) rotate(2deg)}}
+  @keyframes subir{0%{transform:translateY(0);opacity:0}25%{opacity:.9}100%{transform:translateY(-30px);opacity:0}}
+  .chips{gap:8px}
+  button.chip{width:auto;padding:4px 14px;font-size:.78rem;font-weight:700;background:transparent;border-radius:999px;box-shadow:none;border:1.5px solid var(--c);color:var(--c);opacity:.7;cursor:pointer}
+  button.chip:hover{opacity:1}
+  button.chip.cli{--c:#c0151f;--t:#fff}button.chip.vis{--c:#7a6a47;--t:#fff}
+  button.chip.on{background:var(--c);color:var(--t);opacity:1;transform:scale(1.08)}
+  button{background:#bdbec3;color:var(--deep)}
+  button.ready{background:var(--leaf);color:#fff;box-shadow:0 10px 22px rgba(192,21,31,.3)}
+  button.checking{background:var(--leaf);color:#fff}
+  button.verified{background:var(--ok)}
+  button.ready.adm,button.checking.adm,button.verified.adm{background:linear-gradient(90deg,#7b2ff7,#f107a3)}
+  button.ready.founder,button.checking.founder,button.verified.founder{background:linear-gradient(90deg,#000000,#7b2ff7,#c0151f)}
+  .nube,.nube::before,.nube::after,.nube i{background:#ececef}
+  .nube strong{color:#25262a}
+  .welcome{background:#3b3c41}
+  .welcome.admin{background:linear-gradient(135deg,#1a0b3d,#7b2ff7 55%,#f107a3)}
+  .welcome.founder{background:radial-gradient(circle at 50% 50%,#7b2ff7 0%,#000000 80%)}
+  @media (max-width:900px){.b-top .logo{height:30px}.b-top span{display:none}}
+</style>
+</head>
+<body>
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div class="shell">
+    <aside class="brand">
+      <div class="rings" aria-hidden="true"><i></i><i></i><i></i></div>
+
+      <div class="b-top">
+        <img class="logo" src="img/logo-orion.png" alt="Orion 3D">
+        <div><span>Modelado · Animación · Cursos</span></div>
+      </div>
+
+      <div class="b-mid">
+        <span class="eyebrow">Tienda de servicios 3D</span>
+        <h2>Modelado y animación <em>a su medida</em></h2>
+        <p class="lead">Modelos 3D para FiveM, animación 2D y 3D, cursos personalizados, edición de video y foto, y desarrollo web.</p>
+        <div class="quotes" aria-hidden="true">
+          <p>Cursos a su nivel, en Maya, 3ds Max y Blender.</p>
+          <p>Pedidos y soporte directo por Discord.</p>
+          <p>Cada proyecto, con su factura clara.</p>
+        </div>
+        <div class="stats">
+          <div class="stat"><b id="nserv" data-n="0">0</b><span>Servicios</span></div>
+          <div class="stat"><b data-n="3">0</b><span>Programas 3D</span></div>
+        </div>
+      </div>
+
+      <div class="b-foot"><span>&copy; <span id="yr">2026</span> Orion 3D</span><span>Maya · 3ds Max · Blender</span></div>
+    </aside>
+
+    <section class="side">
+      <div id="blobs" aria-hidden="true"></div>
+
+      <main class="login" id="card">
+        <div class="top">
+          <svg class="plant" id="plant" viewBox="0 0 160 160" aria-hidden="true">
+            <ellipse class="sh" cx="80" cy="146" rx="36" ry="6"/>
+            <g class="cb">
+              <polygon class="ft" points="80,28 124,54 80,80 36,54"/>
+              <polygon class="fl" points="36,54 80,80 80,132 36,106"/>
+              <polygon class="fr" points="124,54 80,80 80,132 124,106"/>
+            </g>
+            <circle class="sp" cx="38" cy="44" r="3"/><circle class="sp" cx="126" cy="40" r="2.5"/><circle class="sp" cx="80" cy="16" r="2.5"/>
+          </svg>
+          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="2" aria-valuenow="0" id="bar"><i id="barfill"></i></div>
+        </div>
+
+        <div class="body">
+          <span class="tag">Acceso a la tienda</span>
+          <h1>Orion 3D</h1>
+          <p class="sub">Completa los datos para ingresar</p>
+
+          <form id="form" method="post" novalidate autocomplete="off">
+            <div class="field rise" style="--i:1">
+              <label for="u">Nombre</label>
+              <input type="text" id="u" name="u" placeholder="Ej: Jhon Maldonado" maxlength="40" aria-describedby="hu" required>
+              <div class="hint" id="hu" aria-live="polite">Tu nombre, empezando con mayúscula.</div>
+            </div>
+            <div class="field rise" style="--i:2">
+              <label for="p">Rol</label>
+              <input type="text" id="p" name="p" placeholder="Cliente o Visitante" maxlength="20" aria-describedby="hp" required>
+              <div class="hint" id="hp" aria-live="polite">Escribe Cliente o Visitante, o elígelo abajo.</div>
+              <div class="chips"><button type="button" class="chip cli" data-r="Cliente">Cliente</button><button type="button" class="chip vis" data-r="Visitante">Visitante</button></div>
+            </div>
+            <div class="pin-wrap">
+              <div class="nube" id="nube" role="status" aria-live="polite"><small>Tu Pin es:</small><strong id="nubePin">----</strong><b></b><i></i><i></i></div>
+              <div class="tipo-box alto" id="pinBox" inert aria-hidden="true">
+                <label for="pin">PIN de 4 dígitos</label>
+                <input type="text" id="pin" class="pin-in" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••" aria-describedby="hpin">
+                <div class="hint" id="hpin" aria-live="polite">Escribe el PIN que aparece en la nube.</div>
+                <button type="button" class="relink" id="repin">¿No alcanzaste a verlo? Obtener PIN de nuevo</button>
+              </div>
+            </div>
+            <div class="rise" style="--i:3"><button type="submit" id="btn"><span class="spin" aria-hidden="true"></span><span id="btnlabel" aria-live="polite">Ingresar</span></button></div>
+          </form>
+
+          <p class="privacy rise" style="--i:4">Tus datos no se envían a ningún servidor. Solo se guardan temporalmente en tu navegador para saludarte y se borran al cerrar la pestaña o al salir.</p>
+        </div>
+      </main>
+    </section>
+  </div>
+
+  <div class="sec" id="apinm" role="dialog" aria-modal="true" aria-labelledby="apinT" aria-hidden="true">
+    <form class="sec-card" id="apinForm" autocomplete="off" novalidate>
+      <div class="sec-ico" aria-hidden="true">🔑</div>
+      <h3 id="apinT">PIN de seguridad</h3>
+      <div class="apin-dots" id="apinDots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <p class="sec-sub">Ingresa tu PIN de 4 dígitos.</p>
+      <input type="password" id="apin" class="pin-in" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••" aria-label="PIN de 4 dígitos">
+      <div class="sec-msg" id="apinMsg" aria-live="polite"></div>
+      <div class="sec-acts"><button type="button" class="sec-cancel" id="apinNo">Cancelar</button><button type="submit" class="sec-go">Continuar</button></div>
+    </form>
+  </div>
+
+  <div class="lock" id="lock" role="alertdialog" aria-modal="true" aria-labelledby="lockT" aria-hidden="true">
+    <div class="lock-card">
+      <svg class="lock-ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="bg" cx="60" cy="60" r="52"/><circle class="fg" id="lockArc" cx="60" cy="60" r="52"/></svg>
+      <div class="lock-time" id="lockTime" aria-live="off">2:00</div>
+      <h3 id="lockT">🔒 Acceso bloqueado</h3>
+      <p id="lockMsg">Hubo 3 intentos fallidos. Por seguridad, el ingreso se desbloqueará solo cuando termine el tiempo.</p>
+    </div>
+  </div>
+
+  <div class="sec" id="sec" role="dialog" aria-modal="true" aria-labelledby="secT" aria-hidden="true">
+    <form class="sec-card" id="secForm" autocomplete="off" novalidate>
+      <div class="sec-ico" aria-hidden="true">🛡️</div>
+      <h3 id="secT">Verificación de seguridad</h3>
+      <p class="sec-sub">Responde las 3 preguntas para continuar.</p>
+      <label style="--i:1"><span>1. ¿Qué sistema operativo usas?</span><input type="text" placeholder="Tu respuesta" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+      <label style="--i:2"><span>2. Nombre del proyecto audiovisual de Juan (en minúscula)</span><input type="text" placeholder="Tu respuesta" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+      <label style="--i:3"><span>3. ¿Qué editor de código se usó para crear la página?</span><input type="text" placeholder="Tu respuesta" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+      <div class="sec-msg" id="secMsg" aria-live="polite"></div>
+      <div class="sec-acts"><button type="button" class="sec-cancel" id="secNo">Cancelar</button><button type="submit" class="sec-go" id="secGo">Verificar</button></div>
+    </form>
+  </div>
+
+  <div class="welcome" id="welcome" role="status" aria-live="polite">
+    <div>
+      <h2 id="wtitle"></h2>
+      <p id="wsub"></p>
+      <div class="dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></div>
+    </div>
+  </div>
+
+<script src="js/datos.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  const card = $('card'), plant = $('plant'), btn = $('btn');
+  const uIn = $('u'), pIn = $('p'), hu = $('hu'), hp = $('hp');
+
+  /* ================= LISTA DE CLIENTES AMPLIABLE =================
+     Aquí puedes agregar más nombres de clientes en el futuro. */
+  const CLIENTES_EXTRAS = [
+    { nombre: "Jhon Maldonado" },
+    { nombre: "Angel Trespalacios" }
+  ];
+  // Combinamos con los clientes que ya vengan de datos.js si existen
+  const TODOS_LOS_CLIENTES = (typeof CLIENTES !== 'undefined' ? CLIENTES : []).concat(CLIENTES_EXTRAS);
+
+  const ROLES = ['Cliente', 'Visitante', 'Founder'];
+  const CONECTORES = ['de', 'del', 'la', 'las', 'los', 'y'];
+
+  /* ================= MODERACIÓN DE LENGUAJE =================
+     Normaliza tildes, leetspeak, repeticiones y separadores para reducir
+     evasiones como p.u.t.a, p-u-t-a, p4t4 o miiiiierda.
+     Es un filtro determinista: no interpreta contexto como una IA. */
+  const BLOCKED_WORDS = [
+    // Insultos y vulgaridades frecuentes en español
+    'puta','puto','putas','putos','putisima','putisimo','putear','puteria',
+    'mierda','mierdas','mierdero','mierdoso','carajo','carajos','joder','jodido',
+    'gonorrea','gonorreaaa','malparido','malparida','malparidos','hijueputa','hijueputas',
+    'hijoeputa','hijueputazo','careverga','caremonda','maricon','maricona','maricas',
+    'pendejo','pendeja','pendejos','estupido','estupida','estupidos','imbecil','imbeciles',
+    'idiota','idiotas','baboso','babosa','tarado','tarada','culiao','culiada','culero',
+    'culero','coño','cojones','chingar','chingada','chingado','cabrón','cabron','cabrona',
+    'mamaguevo','mamagüevo','mamahuevo','mamón','mamon','maldito','maldita',' desgraciado',
+    'verga','vergas','vergazo','pinga','chucha','hpta','hp','ptm','ctm','mk','marik',
+    // Términos anatómicos/sexuales explícitos solicitados por la política del sitio
+    'pene','penes','pito','pitos','verga','vagina','vulva','vulvas','clitoris','clítoris',
+    'clit','testiculo','testiculos','huevo','huevos','escroto','ano','anales','culo','culos',
+    'nalgas','teta','tetas','pezon','pezones','senos','chichi','chichis','panocha','concha',
+    'cuca','cucas','picha','pichas','polla','pollas','pajero','pajera','masturbar','masturbacion',
+    'follar','follada','follado','coger','sexo','pornografia','porno',' xxx '
+  ];
+  const BLOCKED_PARTS = [
+    'hijueput','hijoeput','gonorre','malparid','maricon','pendej','estupid','imbecil',
+    'mamaguev','mamahuev','careverg','caremond','masturb','pornograf','culia','putis'
+  ];
+
+  const strip = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const collapse = s => s.replace(/(.)\1+/g, '$1');
+  const normalizeModeration = value => collapse(strip(value)
+    .replace(/[@]/g, 'a').replace(/[0]/g, 'o').replace(/[1!|]/g, 'i')
+    .replace(/[3]/g, 'e').replace(/[4]/g, 'a').replace(/[5$]/g, 's')
+    .replace(/[7]/g, 't').replace(/[6]/g, 'g').replace(/[8]/g, 'b')
+    .replace(/[^a-z]/g, ''));
+  const WORDSET = new Set(BLOCKED_WORDS.map(w => normalizeModeration(w)));
+  const PARTS = BLOCKED_PARTS.map(w => normalizeModeration(w).trim()).filter(Boolean);
+
+  function isVulgar(text) {
+    const raw = strip(String(text));
+    const normalized = normalizeModeration(raw);
+    if (!normalized) return false;
+    // Separa por espacios, pero elimina símbolos dentro de cada fragmento:
+    // así p.u.t.a, p-u-t-a y p4t4 se convierten en una misma secuencia detectable.
+    const tokens = raw.split(/\s+/).map(normalizeModeration).filter(Boolean);
+    if (tokens.some(token => WORDSET.has(token))) return true;
+    if (WORDSET.has(normalized)) return true;
+    // También detecta letras separadas por espacios: "p u t a".
+    // Se prueban secuencias contiguas para no depender de una única palabra completa.
+    for (let start = 0; start < tokens.length; start++) {
+      let joined = '';
+      for (let end = start; end < tokens.length && end < start + 18; end++) {
+        joined += tokens[end];
+        if (WORDSET.has(joined)) return true;
+        if (PARTS.some(part => joined.includes(part))) return true;
+      }
+    }
+    // Las raíces se aplican solo a términos claramente ofensivos/sexuales.
+    return PARTS.some(part => normalized.includes(part) || tokens.some(token => token.startsWith(part)));
+  }
+  function isGibberish(text) {
+    return strip(text).split(/\s+/).some(t =>
+      (t.length >= 3 && !/[aeiouy]/.test(t)) ||
+      /[^aeiouy]{5,}/.test(t) ||
+      /(.)\1{2,}/.test(t)
+    );
+  }
+
+  const normNombre = s => strip(s).trim().replace(/\s+/g, ' ');
+  const esCliente = n => TODOS_LOS_CLIENTES.some(c => normNombre(c.nombre) === normNombre(n));
+  const rolNormal = v => ROLES.find(r => r.toLowerCase() === v.trim().toLowerCase()) || '';
+  
+  function checkName(v) {
+    v = v.trim().replace(/\s+/g, ' ');
+    if (!v) return { ok: false, msg: 'Escribe tu nombre.' };
+    if (isVulgar(v)) return { ok: false, msg: 'El nombre contiene lenguaje no permitido.' };
+    if (esCliente(v)) return { ok: true, msg: 'Nombre válido.' };
+    if (!/^\p{L}+(?: \p{L}+)*$/u.test(v)) return { ok: false, msg: 'Usa solo letras, sin números ni símbolos.' };
+    if (v.split(' ').some(w => w.length < 2)) return { ok: false, msg: 'Cada parte del nombre debe tener al menos 2 letras.' };
+    if (isGibberish(v)) return { ok: false, msg: 'Eso parece texto al azar o sin sentido.' };
+    return { ok: true, msg: 'Nombre válido.' };
+  }
+
+  function checkRole(v) {
+    v = v.trim();
+    if (!v) return { ok: false, msg: 'Escribe un rol válido.' };
+    if (rolNormal(v)) return { ok: true, msg: 'Rol válido.' };
+    return { ok: false, msg: 'Rol no reconocido.' };
+  }
+
+  function paint(input, hint, r, show) {
+    input.classList.toggle('ok', show && r.ok);
+    input.classList.toggle('bad', show && !r.ok);
+    hint.className = 'hint' + (show ? (r.ok ? ' ok' : ' bad') : '');
+    if (show) hint.textContent = r.msg;
+  }
+
+  let touchedU = false, touchedP = false;
+
+  /* ================= DETECCIÓN DE JUAN MALDONADOADMIN ================= */
+  function esFounder() {
+    return uIn.value.trim() === 'Juan MaldonadoAdmin';
+  }
+
+  function update() {
+    // Autocompletar rol y bloquearlo visualmente si escriben Juan MaldonadoAdmin
+    if (esFounder()) {
+      pIn.value = 'Founder';
+      pIn.readOnly = true;
+      [uIn, pIn].forEach(i => i.classList.remove('ok', 'bad'));
+      hu.className = hp.className = 'hint';
+      hu.textContent = 'Acceso especial Founder detectado.';
+      hp.textContent = 'Rol asignado automáticamente.';
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+      mostrar($('pinBox'), false); 
+      if (pinVisible) { resetPin(); pinVisible = false; }
+      plant.setAttribute('class', 'plant s2 founder'); 
+      $('barfill').style.width = '100%';
+      btn.classList.add('ready', 'founder');
+      btn.classList.remove('adm');
+      return { ru: { ok: true }, rp: { ok: true }, all: true };
+    } else {
+      pIn.readOnly = false;
+      btn.classList.remove('founder');
+    }
+
+    if (esAdmin()) {
+      [uIn, pIn].forEach(i => i.classList.remove('ok', 'bad'));
+      hu.className = hp.className = 'hint';
+      hu.textContent = 'Tu nombre, empezando con mayúscula.';
+      hp.textContent = 'Escribe Cliente o Visitante, o elígelo abajo.';
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+      mostrar($('pinBox'), false); if (pinVisible) { resetPin(); pinVisible = false; }
+      plant.setAttribute('class', 'plant s2 adm'); $('barfill').style.width = '100%';
+      btn.classList.add('ready', 'adm');
+      return { ru: { ok: true }, rp: { ok: true }, all: true };
+    }
+    btn.classList.remove('adm');
+    
+    const ru = checkName(uIn.value), rp = checkRole(pIn.value);
+    paint(uIn, hu, ru, touchedU && uIn.value !== '');
+    paint(pIn, hp, rp, touchedP && pIn.value !== '');
+    const rol = rolNormal(pIn.value);
+    
+    const esCli = rp.ok && rol === 'Cliente' && ru.ok && esCliente(uIn.value);
+    mostrar($('pinBox'), esCli);
+    if (esCli && !pinVisible) nuevoPin(true);
+    if (!esCli && pinVisible) resetPin();
+    pinVisible = esCli;
+    const pinOk = !esCli || (pinActual !== '' && pinIn.value === pinActual);
+    const stage = (ru.ok ? 1 : 0) + (rp.ok && pinOk ? 1 : 0);
+    plant.setAttribute('class', 'plant' + (stage ? ' s' + stage : ''));
+    $('barfill').style.width = stage * 50 + '%';
+    $('bar').setAttribute('aria-valuenow', stage);
+    btn.classList.toggle('ready', stage === 2);
+    document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', rp.ok && c.dataset.r === rol));
+    return { ru, rp, all: stage === 2 };
+  }
+
+  uIn.addEventListener('input', () => { touchedU = true; update(); });
+  pIn.addEventListener('input', () => { touchedP = true; update(); });
+  document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => { pIn.value = c.dataset.r; touchedP = true; update(); }));
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const label = $('btnlabel');
+  function setLabel(t) { label.textContent = t; label.classList.remove('fade'); void label.offsetWidth; label.classList.add('fade'); }
+
+  async function verificarCliente() {
+    btn.disabled = true; uIn.readOnly = pIn.readOnly = true; pinIn.readOnly = true;
+    btn.classList.add('checking');
+    await sleep(30);
+    const pasos = ['Verificando datos…', 'Comprobando lista de clientes…', 'Validando identidad…'];
+    for (let i = 0; i < pasos.length; i++) {
+      setLabel(pasos[i]);
+      btn.style.setProperty('--p', ((i + 1) * 33.4) + '%');
+      await sleep(950);
+    }
+    const ok = esCliente(uIn.value);
+    btn.classList.remove('checking'); btn.style.removeProperty('--p');
+    if (ok) {
+      btn.classList.add('verified'); setLabel('Cliente verificado ✓');
+      await sleep(900);
+      return true;
+    }
+    btn.classList.add('denied'); setLabel('No se pudo verificar');
+    plant.setAttribute('class', 'plant s1'); $('barfill').style.width = '50%';
+    const n = fallo();
+    paint(uIn, hu, { ok: false, msg: 'No encontramos ese nombre en la lista de clientes.' + intento(n) }, true);
+    card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+    await sleep(1800);
+    btn.classList.remove('denied'); setLabel('Ingresar');
+    btn.disabled = false; uIn.readOnly = pIn.readOnly = false; pinIn.readOnly = false; uIn.focus();
+    return false;
+  }
+
+  const ADMIN = { user: 'adminjuans', rol: 'adminrol226', nombre: 'JuamCOL' };
+  const esAdmin = () => uIn.value.trim().toLowerCase() === ADMIN.user && pIn.value.trim().toLowerCase() === ADMIN.rol;
+  
+  async function entrarAdmin() {
+    btn.disabled = true; uIn.readOnly = pIn.readOnly = true;
+    btn.classList.add('checking', 'adm');
+    await sleep(30);
+    const pasos = ['Verificando credenciales…', 'Autenticando administrador…', 'Cargando panel…'];
+    for (let i = 0; i < pasos.length; i++) {
+      setLabel(pasos[i]); btn.style.setProperty('--p', ((i + 1) * 33.4) + '%'); await sleep(850);
+    }
+    setLabel('Último paso…');
+    if (!(await pedirPin(2))) {
+      btn.classList.remove('checking', 'adm'); btn.style.removeProperty('--p');
+      setLabel('Ingresar'); btn.disabled = false; uIn.readOnly = pIn.readOnly = false;
+      return;
+    }
+    btn.classList.remove('checking'); btn.classList.add('verified'); setLabel('Acceso concedido ✓');
+    Auth.crear({ nombre: ADMIN.nombre, rol: 'Admin', tipo: '' });
+    await sleep(600);
+    $('wtitle').textContent = 'Bienvenido, ' + ADMIN.nombre;
+    $('wsub').textContent = 'Abriendo el panel de administración';
+    $('welcome').classList.add('admin', 'show');
+    setTimeout(() => { window.location.href = './admin.html'; }, 2500);
+  }
+
+  const h53 = Auth.h53;
+  const SEG = [4120791596001276, 8252721565375576, 2271514558588381];
+  const PINS_ADMIN = [5283806238459691, 5367414925206410, 2829730809917389];
+  const secEl = $('sec'), secForm = $('secForm'), secMsg = $('secMsg'), secGo = $('secGo');
+  
+  function pedirSeguridad() {
+    return new Promise(resolve => {
+      const ins = secForm.querySelectorAll('input');
+      ins.forEach(i => { i.value = ''; });
+      secMsg.className = 'sec-msg'; secMsg.textContent = ''; secGo.disabled = false;
+      secEl.classList.add('show'); secEl.setAttribute('aria-hidden', 'false');
+      setTimeout(() => ins[0].focus(), 600);
+      const cerrar = ok => {
+        secEl.classList.remove('show'); secEl.setAttribute('aria-hidden', 'true');
+        secForm.onsubmit = null; $('secNo').onclick = null; resolve(ok);
+      };
+      $('secNo').onclick = () => cerrar(false);
+      secForm.onsubmit = e => {
+        e.preventDefault();
+        const ok = SEG.every((h, i) => h53(ins[i].value.trim()) === h);
+        if (ok) {
+          secMsg.className = 'sec-msg ok'; secMsg.textContent = 'Identidad confirmada ✓'; secGo.disabled = true;
+          setTimeout(() => { secGo.disabled = false; cerrar(true); }, 700);
+          return;
+        }
+        secForm.classList.remove('shake'); void secForm.offsetWidth; secForm.classList.add('shake');
+        const n = fallo();
+        if (n >= MAX_FALLOS) { cerrar(false); return; }
+        secMsg.className = 'sec-msg'; secMsg.textContent = 'Alguna respuesta es incorrecta.' + intento(n);
+      };
+    });
+  }
+
+  const pinm = $('apinm'), apinIn = $('apin');
+  apinIn.addEventListener('input', () => { apinIn.value = apinIn.value.replace(/\D/g, '').slice(0, 4); });
+  
+  function pedirPin(i) {
+    return new Promise(resolve => {
+      const msg = $('apinMsg'), f = $('apinForm');
+      apinIn.value = ''; msg.className = 'sec-msg'; msg.textContent = '';
+      $('apinT').textContent = 'PIN de seguridad ' + (i + 1) + ' de 3';
+      document.querySelectorAll('#apinDots i').forEach((d, k) => d.classList.toggle('on', k <= i));
+      pinm.classList.add('show'); pinm.setAttribute('aria-hidden', 'false');
+      setTimeout(() => apinIn.focus(), 500);
+      const cerrar = ok => {
+        pinm.classList.remove('show'); pinm.setAttribute('aria-hidden', 'true');
+        f.onsubmit = null; $('apinNo').onclick = null; resolve(ok);
+      };
+      $('apinNo').onclick = () => cerrar(false);
+      f.onsubmit = e => {
+        e.preventDefault();
+        if (apinIn.value.length < 4) { msg.className = 'sec-msg'; msg.textContent = 'Escribe los 4 dígitos.'; return; }
+        if (h53(apinIn.value) === PINS_ADMIN[i]) {
+          msg.className = 'sec-msg ok'; msg.textContent = 'PIN correcto ✓';
+          setTimeout(() => cerrar(true), 450);
+          return;
+        }
+        f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake');
+        cerrar(false);
+        bloquear(ADMIN_LOCK_MS, 'admin-pin');
+      };
+    });
+  }
+
+  let pinActual = '', pinVisible = false, nubeT = null;
+  const nube = $('nube'), pinIn = $('pin');
+  function mostrar(box, on) { box.classList.toggle('show', on); box.inert = !on; box.setAttribute('aria-hidden', on ? 'false' : 'true'); }
+  function genPin() {
+    const n = (window.crypto && crypto.getRandomValues) ? crypto.getRandomValues(new Uint32Array(1))[0] % 10000 : Math.floor(Math.random() * 10000);
+    return String(n).padStart(4, '0');
+  }
+  function verNube() {
+    clearTimeout(nubeT);
+    $('nubePin').textContent = pinActual;
+    nube.classList.remove('show'); void nube.offsetWidth; nube.classList.add('show');
+    nubeT = setTimeout(() => nube.classList.remove('show'), 5000);
+  }
+  function nuevoPin(esperar) {
+    pinActual = genPin(); pinIn.value = ''; pinIn.classList.remove('ok', 'bad');
+    $('hpin').className = 'hint'; $('hpin').textContent = 'Escribe el PIN que aparece en la nube.';
+    clearTimeout(nubeT);
+    if (esperar) nubeT = setTimeout(verNube, 600); else verNube();
+  }
+  function resetPin() {
+    clearTimeout(nubeT); nube.classList.remove('show');
+    pinActual = ''; pinIn.value = ''; pinIn.classList.remove('ok', 'bad');
+  }
+  pinIn.addEventListener('input', () => {
+    pinIn.value = pinIn.value.replace(/\D/g, '').slice(0, 4);
+    const h = $('hpin');
+    if (pinIn.value.length === 4) {
+      const ok = pinIn.value === pinActual;
+      pinIn.classList.toggle('ok', ok); pinIn.classList.toggle('bad', !ok);
+      h.className = 'hint ' + (ok ? 'ok' : 'bad');
+      h.textContent = ok ? 'PIN correcto.' : 'PIN incorrecto.';
+    } else {
+      pinIn.classList.remove('ok', 'bad'); h.className = 'hint'; h.textContent = 'Escribe el PIN que aparece en la nube.';
+    }
+    update();
+  });
+  $('repin').addEventListener('click', () => { nuevoPin(false); update(); pinIn.focus(); });
+
+  const LOCK_MS = 120000, MAX_FALLOS = 3, ADMIN_LOCK_MS = 30 * 60 * 1000;
+  const VISITOR_VULGAR_LOCK_MS = 60 * 60 * 1000;
+  const lockEl = $('lock'), lockTime = $('lockTime'), lockArc = $('lockArc');
+  let lockT = null;
+  const ls = {
+    get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} },
+    del: k => { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+  const bloqueoRestante = () => Math.max(0, (+ls.get('lg_lock') || 0) - Date.now());
+  const intento = n => n < MAX_FALLOS ? ' (Intento ' + n + ' de ' + MAX_FALLOS + ')' : '';
+  function limpiarFallos() { ls.del('lg_fails'); }
+  function fallo() {
+    const n = (+ls.get('lg_fails') || 0) + 1;
+    if (n >= MAX_FALLOS) { bloquear(LOCK_MS); return MAX_FALLOS; }
+    ls.set('lg_fails', n);
+    return n;
+  }
+  function bloquear(ms, reason = 'attempts') {
+    ls.set('lg_lock', Date.now() + ms);
+    ls.set('lg_lockms', ms);
+    ls.set('lg_lock_reason', reason);
+    ls.set('lg_fails', 0);
+    mostrarBloqueo();
+  }
+  function mostrarBloqueo() {
+    const shell = document.querySelector('.shell');
+    const total = +ls.get('lg_lockms') || LOCK_MS;
+    const reason = ls.get('lg_lock_reason') || 'attempts';
+    const profundo = reason === 'admin-pin';
+    shell.inert = true;
+    if (profundo) { shell.style.visibility = 'hidden'; Auth.limpiar(); }
+    lockEl.style.transition = profundo ? 'none' : '';
+    lockEl.classList.toggle('profundo', profundo);
+    const lockMessages = {
+      vulgarity: 'Se detectó lenguaje vulgar o contenido sexual explícito en el nombre. El acceso como visitante queda suspendido durante 60 minutos. El contador no se reinicia al recargar la página.',
+      'admin-pin': 'La verificación administrativa falló. El acceso está suspendido temporalmente.',
+      attempts: 'Se alcanzó el máximo de intentos fallidos. El acceso se desbloqueará cuando termine el contador.'
+    };
+    $('lockMsg').textContent = lockMessages[reason] || lockMessages.attempts;
+    lockEl.classList.add('show'); lockEl.setAttribute('aria-hidden', 'false');
+    clearInterval(lockT);
+    const tick = () => {
+      const ms = bloqueoRestante();
+      if (ms <= 0) {
+        clearInterval(lockT); ls.del('lg_lock'); ls.del('lg_lockms'); ls.del('lg_lock_reason'); ls.del('lg_fails');
+        lockEl.classList.remove('show'); lockEl.setAttribute('aria-hidden', 'true'); shell.inert = false; shell.style.visibility = '';
+        return;
+      }
+      const sg = Math.ceil(ms / 1000);
+      lockTime.textContent = Math.floor(sg / 60) + ':' + String(sg % 60).padStart(2, '0');
+      lockArc.style.strokeDashoffset = 326.7 * (1 - ms / total);
+    };
+    tick(); lockT = setInterval(tick, 250);
+  }
+  if (bloqueoRestante() > 0) mostrarBloqueo();
+
+  /* ---------- Envío del formulario ---------- */
+  $('form').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (bloqueoRestante() > 0) { mostrarBloqueo(); return; }
+
+    // Moderación prioritaria: el filtro se ejecuta antes de clientes/roles especiales.
+    // La sanción de 60 minutos se aplica específicamente al intento de entrar como Visitante.
+    const nombreIngresado = uIn.value.trim();
+    const rolIngresado = rolNormal(pIn.value);
+    const contenidoVulgar = isVulgar(nombreIngresado) || isVulgar(pIn.value);
+    if (contenidoVulgar && rolIngresado === 'Visitante') {
+      paint(uIn, hu, { ok: false, msg: 'Acceso rechazado: el nombre contiene lenguaje no permitido.' }, true);
+      btn.classList.remove('ready', 'checking', 'verified');
+      btn.classList.add('denied');
+      setLabel('Acceso rechazado');
+      bloquear(VISITOR_VULGAR_LOCK_MS, 'vulgarity');
+      return;
+    }
+    if (contenidoVulgar) {
+      paint(uIn, hu, { ok: false, msg: 'El texto contiene lenguaje no permitido.' }, true);
+      card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+      return;
+    }
+    
+    // Si es el usuario Founder (Juan MaldonadoAdmin)
+    if (esFounder()) {
+      limpiarFallos();
+      btn.disabled = true;
+      btn.classList.add('verified');
+      setLabel('Acceso Founder concedido ✓');
+      Auth.crear({ nombre: 'Juan Maldonado', rol: 'Founder', tipo: '' });
+      await sleep(800);
+      $('wtitle').textContent = 'Bienvenido, Founder Juan Maldonado';
+      $('wsub').textContent = 'Cargando sesión con privilegios especiales';
+      $('welcome').classList.add('founder', 'show');
+      setTimeout(() => { window.location.href = './home.html'; }, 2500);
+      return;
+    }
+
+    if (esAdmin()) {
+      if (!(await pedirPin(0))) return;
+      if (!(await pedirSeguridad())) return;
+      if (!(await pedirPin(1))) return;
+      limpiarFallos();
+      await entrarAdmin();
+      return;
+    }
+
+    touchedU = touchedP = true;
+    const { ru, rp, all } = update();
+    if (!all) {
+      paint(uIn, hu, ru, true); paint(pIn, hp, rp, true);
+      card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+      return;
+    }
+    const rol = rolNormal(pIn.value);
+    if (rol === 'Cliente' && !(await verificarCliente())) return;
+    
+    limpiarFallos();
+    btn.disabled = true;
+    const reg = TODOS_LOS_CLIENTES.find(c => normNombre(c.nombre) === normNombre(uIn.value));
+    const nombre = (rol === 'Cliente' && reg) ? reg.nombre : uIn.value.trim().replace(/\s+/g, ' ');
+    Auth.crear({ nombre: nombre, rol: rol, tipo: '' });
+    
+    $('wtitle').textContent = 'Bienvenido(a), ' + nombre;
+    $('wsub').textContent = 'Ingresando como ' + rol + ' a Orion 3D';
+    $('welcome').classList.add('show');
+    setTimeout(() => { window.location.href = './home.html'; }, 3000);
+  });
+
+  /* Fondos y partículas */
+  const box = $('blobs'), tones = ['#c0151f', '#46474d', '#e6d6b8', '#7d0b15'];
+  for (let i = 0; i < 12; i++) {
+    const s = document.createElement('span'), size = 70 + Math.random() * 190;
+    s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random() * 100}%;top:${Math.random() * 100}%;` +
+      `background:${tones[i % 4]};opacity:${.10 + Math.random() * .14};filter:blur(${6 + Math.random() * 14}px)`;
+    box.appendChild(s);
+  }
+
+  update();
+</script>
+</body>
+</html>

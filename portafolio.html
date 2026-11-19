@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="./js/auth.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#46474d">
+<title>Portafolio · Orion 3D</title>
+<meta name="description" content="Portafolio de publicaciones y proyectos de Le Roi Du Monde en Orion 3D.">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/favicon.png">
+<link rel="stylesheet" href="css/estilos.css">
+<style>
+  /* Animación de entrada suave para toda la página */
+  @keyframes fadeInPage {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  body {
+    animation: fadeInPage 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+
+
+  /* Corrección móvil: evita que el transform del body
+    convierta la barra fija en un elemento relativo a la página */
+  @keyframes fadeInPageMobile {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 760px) {
+    body {
+      animation: fadeInPageMobile 0.6s
+        cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    }
+  }
+
+
+  /* Estilos específicos para el muro de publicaciones del portafolio */
+  .feed {
+    max-width: 740px;
+    margin: 0 auto;
+    display: grid;
+    gap: 30px;
+  }
+  .pub-card {
+    background: var(--sup);
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  }
+  .pub-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--borde);
+    background: var(--sup2);
+  }
+  .pub-autor {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .pub-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--rojo);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .pub-info h3 {
+    font-size: 1rem;
+    color: var(--texto);
+    line-height: 1.2;
+  }
+  .pub-info span {
+    font-size: 0.8rem;
+    color: var(--suave);
+  }
+  .pub-badges {
+    display: flex;
+    gap: 8px;
+  }
+  .badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--sup3);
+    color: var(--texto);
+    border: 1px solid var(--borde);
+  }
+  .badge.cat {
+    background: rgba(192, 21, 31, 0.12);
+    color: var(--rojo);
+    border-color: rgba(192, 21, 31, 0.3);
+  }
+  
+  /* Contenedor horizontal en formato 16:9 estricto */
+  .pub-media-container {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--sup2);
+    overflow: hidden;
+  }
+  .pub-media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .pub-body {
+    padding: 22px 20px;
+  }
+  .pub-body p {
+    color: var(--texto);
+    font-size: 0.98rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  @media (max-width: 760px) {
+    .pub-header { padding: 12px 16px; }
+    .pub-body { padding: 16px; }
+    .pub-badges { flex-direction: column; align-items: flex-end; gap: 4px; }
+  }
+</style>
+</head>
+<body data-pagina="portafolio">
+
+<!-- La barra superior y el pie de página se generan automáticamente desde js/app.js -->
+
+<main>
+  <div class="w m">
+    <section class="cab-pag">
+      <h1 class="calv">Portafolio</h1>
+      <p>Proyectos, modelados, animaciones y desarrollos destacados compartidos por <strong>Le Roi Du Monde</strong>.</p>
+    </section>
+
+    <!-- Contenedor del Feed de Publicaciones -->
+    <div class="feed" id="feed-portafolio"></div>
+  </div>
+</main>
+
+<script src="js/datos.js"></script>
+<script src="js/app.js"></script>
+<script src="js/saludo.js"></script>
+<script>
+/* ==========================================================================
+   DATOS DE LAS PUBLICACIONES DEL PORTAFOLIO
+   Puedes editar, añadir o cambiar los textos, categorías, duraciones e imágenes aquí.
+   ========================================================================== */
+const PUBLICACIONES = [
+  {
+    id: 1,
+    titulo: "Optimización de Texturas y Rigs para FiveM",
+    avatar: "R",
+    fecha: "Hace 2 días",
+    categoria: "Modelado 3D",
+    duracion: "Duración: 2 semanas",
+    imagen: "img/hero-3d.jpg", // Cambia por tu imagen
+    texto: "Desarrollo completo de ropa customizada y streaming de texturas optimizado para servidores de rolplay en FiveM, asegurando rendimiento fluido y calidad visual de alta gama utilizando Blender y texturizado PBR."
+  },
+  {
+    id: 2,
+    titulo: "Sistema de Interfaz y Animaciones Web UI",
+    avatar: "R",
+    fecha: "Hace 1 semana",
+    categoria: "Desarrollo Web",
+    duracion: "Duración: 1 mes",
+    imagen: "img/promo-web.jpg", // Cambia por tu imagen
+    texto: "Implementación de transiciones fluidas, sistema de sesión segura basada en tokens firmados y diseño de componentes modulares dinámicos para plataformas digitales de alto tráfico."
+  },
+  {
+    id: 3,
+    titulo: "Configuración de Audio en Vivo y Escenario",
+    avatar: "R",
+    fecha: "Hace 2 semanas",
+    categoria: "Ingeniería de Audio",
+    duracion: "Duración: Evento en vivo",
+    imagen: "img/audio-coliseo.jpg", // Cambia por tu imagen
+    texto: "Soporte técnico, ruteo de señales y balanceo de energía en red Dante para refuerzo sonoro en evento masivo en el coliseo. Cero interferencias y claridad acústica total."
+  }
+];
+
+function pintarPortafolio() {
+  const contenedor = $("#feed-portafolio");
+  if (!contenedor) return;
+
+  contenedor.innerHTML = PUBLICACIONES.map(pub => `
+    <article class="pub-card" id="pub-${pub.id}">
+      <div class="pub-header">
+        <div class="pub-autor">
+          <div class="pub-avatar">${pub.avatar}</div>
+          <div class="pub-info">
+            <h3 class="calv">Le Roi Du Monde</h3>
+            <span>${pub.fecha}</span>
+          </div>
+        </div>
+        <div class="pub-badges">
+          <span class="badge cat">${pub.categoria}</span>
+          <span class="badge">${pub.duracion}</span>
+        </div>
+      </div>
+      <div class="pub-media-container">
+        <img class="pub-media" src="${pub.imagen}" alt="${esc(pub.titulo)}" loading="lazy" data-img>
+      </div>
+      <div class="pub-body">
+        <h3 class="calv" style="font-size: 1.2rem; margin-bottom: 8px;">${esc(pub.titulo)}</h3>
+        <p>${esc(pub.texto)}</p>
+      </div>
+    </article>
+  `).join("");
+
+  if (window.Anim && typeof Anim.observar === "function") {
+    Anim.observar(contenedor);
+  }
+}
+
+pintarPortafolio();
+</script>
+</body>
+</html>

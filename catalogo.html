@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="./js/auth.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#46474d">
+<title>Catálogo · Orion 3D</title>
+<meta name="description" content="Catálogo de Orion 3D: animación 3D y 2D, modelado, rigging, texturizado, edición de video y foto, cursos y programación web.">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/favicon.png">
+<link rel="stylesheet" href="css/estilos.css">
+<style>
+  @keyframes fadeInPage {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  body {
+    animation: fadeInPage 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    overflow-x: hidden;
+  }
+
+
+
+/* Corrección móvil: evita que el transform del body
+   convierta la barra fija en un elemento relativo a la página */
+  @keyframes fadeInPageMobile {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 760px) {
+    body {
+      animation: fadeInPageMobile 0.6s
+        cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    }
+  }
+
+
+  .cat-layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:26px;align-items:start}
+  .lado{position:sticky;top:72px;min-width:0;max-width:100%}
+  .lado h2{font-size:1.2rem;margin-bottom:14px}
+  .lado label{display:block;font-size:.82rem;color:var(--suave);margin:14px 0 6px}
+  .lado input,.lado select{width:100%;max-width:100%;background:var(--sup2);border:1px solid var(--borde);border-radius:8px;padding:11px 12px;color:var(--texto)}
+  .lado input:focus,.lado select:focus{outline:0;border-color:var(--rojo)}
+  .cats{display:grid;gap:4px}
+  .cats button{display:flex;justify-content:space-between;gap:10px;align-items:center;text-align:left;background:none;border:0;border-radius:8px;padding:10px 12px;color:var(--texto);cursor:pointer;font-size:.92rem}
+  .cats button:hover{background:var(--sup2)}
+  .cats button[aria-pressed=true]{background:var(--rojo);color:#fff;font-weight:700}
+  .cats span{font-size:.78rem;opacity:.7}
+
+  #resultados{min-width:0;max-width:100%}
+  .dest{display:grid;grid-template-columns:1.5fr 1fr;gap:30px;align-items:center;border-radius:16px;padding:34px;margin-bottom:22px;color:#fff;scroll-margin-top:110px;background:linear-gradient(135deg,var(--rojo),var(--rojo-osc));max-width:100%;overflow:hidden}
+  .dest.con-img{grid-template-columns:230px 1.4fr 1fr}
+  .dest .im{aspect-ratio:1/1;border-radius:12px}
+  .dest .tag{display:inline-block;background:var(--arena);color:#25262a;font-size:.74rem;font-weight:700;padding:4px 10px;border-radius:4px;margin-bottom:14px}
+  .dest h2{font-size:clamp(1.8rem,3.8vw,2.9rem);line-height:1.05;margin-bottom:12px;word-wrap:break-word;overflow-wrap:break-word}
+  .dest p{max-width:56ch;margin-bottom:14px;opacity:.92}
+  .dest .chips span{border-color:rgba(255,255,255,.4);color:#fff}
+  .dest .caja{border-left:1px solid rgba(255,255,255,.3);padding-left:28px;min-width:0}
+  .dest .desde{opacity:.9}
+  .dest .monto{font-size:clamp(2.3rem,4.4vw,3.2rem);font-weight:700;line-height:1.1;margin:2px 0 16px}
+  .dest .monto small{font-size:1rem;font-weight:400}
+  .dest .btn{width:100%;background:var(--claro);color:var(--rojo);border-color:var(--claro)}
+  .dest .btn:hover{background:#fff}
+  .vacio-c{text-align:center;padding:50px 20px;color:var(--suave)}
+
+  @media (max-width:900px){
+    .cat-layout{grid-template-columns:minmax(0,1fr);gap:18px}
+    .lado{position:static;padding:16px}
+    .cats{display:flex;overflow-x:auto;gap:8px;padding-bottom:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .cats::-webkit-scrollbar{display:none}
+    .cats button{white-space:nowrap;flex:none;border:1px solid var(--borde);padding:8px 12px;font-size:.84rem}
+    .dest,.dest.con-img{grid-template-columns:minmax(0,1fr);padding:20px 18px;gap:14px}
+    .dest h2{font-size:1.45rem;margin-bottom:8px}
+    .dest p{font-size:.88rem;line-height:1.45;margin-bottom:12px}
+    .dest .caja{border-left:0;border-top:1px solid rgba(255,255,255,.3);padding:14px 0 0}
+    .dest .monto{font-size:1.9rem;margin:2px 0 12px}
+    .dest .btn{padding:12px 16px;font-size:.92rem}
+    .dest .im{display:none}
+  }
+
+  /* Diseño compacto en 2 columnas para móviles en la cuadrícula de servicios */
+  @media (max-width:760px){
+    .rej{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .rej .tarjeta{padding:10px;gap:6px;min-width:0}
+    .rej .im{aspect-ratio:16/10}
+    .rej .tarjeta h3{font-size:.94rem;line-height:1.15}
+    .rej .tarjeta .d{font-size:.78rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .rej .chips{gap:4px}
+    .rej .chips span{font-size:.66rem;padding:2px 6px}
+    .rej .pie-t{flex-direction:column;align-items:stretch;gap:8px;padding-top:6px}
+    .rej .precio{font-size:1.05rem}
+    .rej .btn-mini{width:100%;justify-content:center;padding:8px 10px;font-size:.8rem}
+  }
+
+  @media (max-width:380px){
+    .rej{grid-template-columns:minmax(0,1fr)}
+  }
+</style>
+</head>
+<body data-pagina="catalogo">
+
+<main>
+  <div class="w m">
+    <section class="cab-pag">
+      <h1 class="calv">Catálogo</h1>
+      <p>Precios en dólares estadounidenses (USD). Añada los servicios al carrito y finalice su pedido por Discord.</p>
+    </section>
+
+    <div class="cat-layout">
+      <aside class="lado panel" aria-label="Filtros">
+        <h2 class="calv">Filtrar</h2>
+        <label for="q">Buscar</label>
+        <input type="search" id="q" placeholder="Nombre, programa…" autocomplete="off">
+        <label>Categorías</label>
+        <div class="cats" id="cats"></div>
+        <label for="orden">Ordenar por</label>
+        <select id="orden">
+          <option value="orden">Recomendado</option>
+          <option value="precio-asc">Precio: menor a mayor</option>
+          <option value="precio-desc">Precio: mayor a menor</option>
+          <option value="nombre">Nombre (A–Z)</option>
+        </select>
+      </aside>
+
+      <section id="resultados" aria-live="polite">
+        <div id="dests"></div>
+        <div class="rej" id="grid"></div>
+        <p class="vacio-c" id="vacio" hidden>No hay servicios que coincidan con su búsqueda.</p>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="js/datos.js"></script>
+<script src="js/app.js"></script>
+<script src="js/saludo.js"></script>
+<script>
+const estado={cat:"todas",q:new URLSearchParams(location.search).get("q")||"",orden:"orden"};
+$("#q").value=estado.q;
+
+function coincide(s){
+  if(estado.cat!=="todas"&&s.cat!==estado.cat) return false;
+  if(!estado.q) return true;
+  const t=(s.nombre+" "+s.desc+" "+(s.sw||[]).join(" ")+" "+categoria(s.cat).nombre).toLowerCase();
+  return estado.q.toLowerCase().split(/\s+/).every(w=>t.includes(w));
+}
+function ordenar(l){
+  const a=l.slice(), v=s=>s.precio==null?Infinity:s.precio;
+  if(estado.orden==="precio-asc") a.sort((x,y)=>v(x)-v(y));
+  else if(estado.orden==="precio-desc") a.sort((x,y)=>(y.precio==null?-1:y.precio)-(x.precio==null?-1:x.precio));
+  else if(estado.orden==="nombre") a.sort((x,y)=>x.nombre.localeCompare(y.nombre,"es"));
+  return a;
+}
+function banner(s){
+  const sw=s.sw&&s.sw.length?'<div class="chips">'+s.sw.map(x=>"<span>"+esc(x)+"</span>").join("")+"</div>":"";
+  return '<section class="dest'+(s.img?" con-img":"")+'" id="d-'+s.id+'" aria-label="'+esc(s.nombre)+'">'+
+    (s.img?'<div class="im">'+media(s.img,s.nombre)+"</div>":"")+
+    '<div><span class="tag">Servicio principal</span><h2 class="calv">'+esc(s.nombre)+'</h2><p>'+esc(s.desc)+"</p>"+sw+"</div>"+
+    '<div class="caja">'+(s.precio==null
+      ?'<div class="monto">Cotización</div><a class="btn" href="'+SITIO.discord+'" target="_blank" rel="noopener">Cotizar por Discord</a>'
+      :'<div class="desde">'+(s.desde?"Desde":"Precio")+'</div><div class="monto">'+s.precio.toFixed(2)+' <small>USD</small></div><button class="btn" type="button" data-add="'+s.id+'">Añadir al carrito</button>')+
+    "</div></section>";
+}
+function botones(){
+  const cuenta=id=>SERVICIOS.filter(s=>id==="todas"||s.cat===id).length;
+  $("#cats").innerHTML=[{id:"todas",nombre:"Todas"}].concat(CATEGORIAS).map(c=>
+    '<button type="button" data-c="'+c.id+'" aria-pressed="'+(estado.cat===c.id)+'">'+esc(c.nombre)+"<span>"+cuenta(c.id)+"</span></button>").join("");
+}
+function pintar(){
+  const vis=SERVICIOS.filter(coincide);
+  $("#dests").innerHTML=vis.filter(s=>s.destacado).map(banner).join("");
+  $("#grid").innerHTML=ordenar(vis.filter(s=>!s.destacado)).map(tarjetaServicio).join("");
+  $("#vacio").hidden=vis.length>0;
+  botones(); Anim.observar($("#dests")); Anim.observar($("#grid"));
+}
+$("#cats").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-c]"); if(!b) return;
+  estado.cat=b.dataset.c; history.replaceState(null,"",b.dataset.c==="todas"?location.pathname+location.search:"#"+b.dataset.c); pintar();
+});
+$("#q").addEventListener("input",e=>{estado.q=e.target.value.trim();pintar();});
+$("#orden").addEventListener("change",e=>{estado.orden=e.target.value;pintar();});
+
+function porHash(){
+  const id=location.hash.slice(1);
+  if(id&&CATEGORIAS.some(c=>c.id===id)){estado.cat=id;pintar();setTimeout(()=>$("#resultados").scrollIntoView({behavior:"smooth",block:"start"}),60);}
+}
+addEventListener("hashchange",porHash);
+pintar(); porHash();
+</script>
+</body>
+</html>

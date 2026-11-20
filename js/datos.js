@@ -95,9 +95,11 @@ const PROMOS=[
              Si está vacío, cualquiera puede usarlo.
    Ejemplo personal:  MARIA10:{pct:10, clientes:["María Pérez","mariaperez"]}  */
 const CUPONES={
-  ORION3DFREE:  {pct:100, clientes:[]},
-  ORIONFREE:    {pct:100, clientes:[]},
-  ORIONWINWORLD:{pct:100, clientes:[]}
+  ORION3DFREE:  {pct:78, clientes:[]},
+  ORIONFREEWINFOREVERANGEL23:  {pct:23, clientes:["Angel Trespalacios"]},
+  ORIONWIN3DSHOPJHON28:  {pct:28, clientes:["Jhon Maldonado"]},
+  ORIONFREE:    {pct:80, clientes:[]},
+  ORIONWINWORLD:{pct:46, clientes:[]}
 };
 
 /* ---------- 6. CLIENTES ----------

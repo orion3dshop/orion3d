@@ -12,32 +12,14 @@
 <link rel="stylesheet" href="css/estilos.css">
 <style>
   /* Animación de entrada suave para toda la página */
+  /* Solo opacidad: un transform en <body> (aunque sea translateY(0) con "forwards") convierte
+     al body en el contenedor de todo lo que es position:fixed (modal, barra móvil, avisos). */
   @keyframes fadeInPage {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   body {
     animation: fadeInPage 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-
-
-  /* Corrección móvil: evita que el transform del body
-    convierta la barra fija en un elemento relativo a la página */
-  @keyframes fadeInPageMobile {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  @media (max-width: 760px) {
-    body {
-      animation: fadeInPageMobile 0.6s
-        cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-    }
   }
 
 

@@ -6,6 +6,7 @@
 <title>Orion 3D | Panel Admin</title>
 <script src="js/auth.js"></script>
 <script>Auth.requerirAdmin();   /* solo entra el administrador: sin login válido, vuelve a index.html */</script>
+<script src="js/datos.js"></script>
 <link rel="icon" type="image/png" href="img/favicon.png">
 <style>
 @font-face{font-family:"Calvera";src:url("fonts/calvera.woff2") format("woff2"),url("fonts/calvera.ttf") format("truetype"),url("fonts/calvera.otf") format("opentype");font-display:swap}
@@ -245,7 +246,7 @@ tr:last-child td{border:0}
   <!-- ACCESOS -->
   <section id="v-files" class="hide">
     <div class="tools"><input id="q" type="search" placeholder="Buscar página o archivo…" aria-label="Buscar" autocomplete="off">
-      <button class="chip on" data-c="Todos">Todos</button><button class="chip" data-c="Principal">Principal</button><button class="chip" data-c="Tienda">Tienda</button><button class="chip" data-c="JavaScript">JavaScript</button><button class="chip" data-c="CSS">CSS</button></div>
+      <button class="chip on" data-c="Todos">Todos</button><button class="chip" data-c="Principal">Principal</button><button class="chip" data-c="Tienda">Tienda</button><button class="chip" data-c="JavaScript">JavaScript</button><button class="chip" data-c="CSS">CSS</button><button class="chip" data-c="Recursos">Recursos</button></div>
     <div class="grid" id="grid"></div><div class="empty hide" id="empty">Sin resultados. Prueba con otra búsqueda.</div>
   </section>
 
@@ -291,20 +292,23 @@ tr:last-child td{border:0}
 const FILES=[
  {f:'index.html',n:'Login',c:'Principal',e:'🔐',d:'Acceso a la tienda: Cliente, Visitante y administrador.'},
  {f:'home.html',n:'Inicio',c:'Principal',e:'🏠',d:'Portada con servicios, promociones y preguntas frecuentes.'},
+ {f:'catalogo.html',n:'Catálogo',c:'Tienda',e:'📚',d:'Servicios con filtros, buscador y precios.'},
+ {f:'carrito.html',n:'Carrito',c:'Tienda',e:'🛒',d:'Carrito, cupones y factura descargable.'},
  {f:'admin.html',n:'Panel admin',c:'Principal',e:'🛠️',d:'Este panel de administración.'},
- {f:'catalogo.html',n:'Catálogo',c:'Tienda',e:'📚',d:'Todos los servicios con filtros, buscador y precios.'},
- {f:'carrito.html',n:'Carrito',c:'Tienda',e:'🛒',d:'Carrito, cupones, validación y factura descargable.'},
  {f:'js/auth.js',n:'Autenticación',c:'JavaScript',e:'🛡️',d:'Protege las páginas: sin login no se entra por la URL.'},
  {f:'js/saludo.js',n:'Saludo de usuario',c:'JavaScript',e:'👋',d:'Muestra el saludo y el rol arriba a la derecha.'},
  {f:'js/datos.js',n:'Datos de la tienda',c:'JavaScript',e:'🗂️',d:'Servicios, precios, cupones, clientes y textos.'},
  {f:'js/app.js',n:'Núcleo',c:'JavaScript',e:'⚙️',d:'Carrito, menú, animaciones y fondo de partículas.'},
  {f:'js/factura.js',n:'Factura',c:'JavaScript',e:'🧾',d:'Genera la factura en imagen (PNG).'},
- {f:'css/estilos.css',n:'Estilos',c:'CSS',e:'🎨',d:'Colores, tipografías y diseño de la tienda.'}
+ {f:'css/estilos.css',n:'Estilos',c:'CSS',e:'🎨',d:'Colores, tipografías y diseño de la tienda.'},
+ {f:'img/favicon.png',n:'Favicon',c:'Recursos',e:'🖼️',d:'Icono del sitio mostrado en la pestaña del navegador.'},
+ {f:'img/logo-orion.png',n:'Logo claro',c:'Recursos',e:'🌌',d:'Logotipo para fondos claros.'},
+ {f:'img/logo-orion-oscuro.png',n:'Logo oscuro',c:'Recursos',e:'🌑',d:'Logotipo para fondos oscuros.'}
 ];
-const HTML=it=>/\.html$/.test(it.f), FOLDERS=[['','raíz (HTML)'],['js','js'],['css','css']];
+const HTML=it=>/\.html$/.test(it.f), FOLDERS=[['','raíz (HTML)'],['js','js'],['css','css'],['img','img']];
 const dir=it=>it.f.includes('/')?it.f.split('/')[0]:'';
 const PIN='2552', $=id=>document.getElementById(id), data={};
-const CAT={Principal:'#c0151f',Tienda:'#7a7b82',JavaScript:'#b9a987',CSS:'#7d0b15'};
+const CAT={Principal:'#c0151f',Tienda:'#7a7b82',JavaScript:'#b9a987',CSS:'#7d0b15',Recursos:'#64748b'};
 const THEMES={'Rojo Orion':['#c0151f','#7d0b15'],Grafito:['#46474d','#7a7b82'],Arena:['#a89877','#e6d6b8'],Rubí:['#e11d48','#f59e0b'],Océano:['#0ea5e9','#22d3ee'],Índigo:['#6366f1','#a855f7']};
 const FONTS={'Arial':'Arial,Helvetica,sans-serif','Calvera (títulos)':'"Calvera","Impact",Arial,sans-serif','Sistema':'system-ui,-apple-system,"Segoe UI",sans-serif','Monoespaciada':'ui-monospace,Consolas,"Courier New",monospace'};
 const DEF={mode:'light',theme:'Rojo Orion',a:'#c0151f',b:'#7d0b15',font:'Arial',fs:15,cs:12.5,r:14,anim:1};
@@ -350,7 +354,7 @@ function show(v,f){
   if(v!=='code'){$('src').textContent='';$('ln').textContent='';$('cmeta').innerHTML=''}
   $('side').classList.remove('open');
 }
-document.querySelectorAll('#nav1 button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+document.querySelectorAll('#nav1 button').forEach(b=>b.onclick=()=>{show(b.dataset.v);if(b.dataset.v==='shop')renderShop()});
 FOLDERS.forEach(([d,lbl])=>{
   const list=FILES.filter(it=>dir(it)===d),box=document.createElement('div');box.className='fold';
   box.innerHTML='<button class="fh"><span class="cr">▾</span><span>📁</span><span class="fn"></span><small></small></button><div class="kids"></div>';
@@ -416,8 +420,11 @@ let M='l',OK=[];
 const val=it=>M==='l'?data[it.f].l:data[it.f].kb;
 const vtxt=it=>data[it.f]?(M==='l'?fmt(data[it.f].l):data[it.f].kb.toFixed(1)+' KB'):'—';
 async function stats(){
-  $('bars').innerHTML='<div class="empty">Calculando…</div>';OK=[];
+  $('bars').innerHTML='<div class="empty">Calculando estadísticas…</div>';
+  $('k2').textContent='…';$('k3').textContent='…';OK=[];
   await Promise.all(FILES.map(async it=>{try{await getText(it.f);OK.push(it)}catch(e){}}));
+  $('k1').textContent=OK.length;
+  $('k1s').textContent=OK.filter(HTML).length+' HTML · '+OK.filter(i=>i.c==='JavaScript').length+' JS · '+OK.filter(i=>i.c==='CSS').length+' CSS · '+(FILES.length-OK.length)+' no encontrados';
   draw();
 }
 function draw(){
@@ -425,7 +432,13 @@ function draw(){
   $('k1s').textContent=h+' HTML · '+FILES.filter(i=>i.c==='JavaScript').length+' JS · '+FILES.filter(i=>i.c==='CSS').length+' CSS';
   buildTree();
   $('bars').innerHTML='';
-  if(!OK.length){$('bars').innerHTML='<div class="empty">No se pudieron leer los archivos. Abre el panel desde tu hosting para ver las estadísticas.</div>';$('k2').textContent=$('k3').textContent='—';return}
+  if(!OK.length){
+    $('bars').innerHTML='<div class="empty">No se pudieron leer archivos. Publica el panel en el hosting y verifica las rutas de la lista FILES.</div>';
+    $('k2').textContent=$('k3').textContent='—';
+    $('dn').innerHTML='';$('leg').innerHTML='';$('rank').innerHTML='';
+    ['r1','r2','r3','r4'].forEach(id=>$(id).textContent='—');
+    return;
+  }
   const ok=OK.slice().sort((x,y)=>val(y)-val(x)),tot=ok.reduce((t,i)=>t+val(i),0),max=val(ok[0]);
   $('k2').textContent=fmt(OK.reduce((t,i)=>t+data[i.f].l,0));$('k3').textContent=OK.reduce((t,i)=>t+data[i.f].kb,0).toFixed(1);
   const u=M==='l'?'líneas':'KB';
@@ -462,11 +475,14 @@ $('reload').onclick=()=>{FILES.forEach(f=>delete data[f.f]);stats()};
 
 
 /* ---------- Tienda (lee js/datos.js) ---------- */
-const money=n=>n==null?'Cotización':n.toFixed(2)+' USD';
+const money=n=>n==null?'Cotización':Number(n).toFixed(2)+' USD';
 const PAL=['#c0151f','#7a7b82','#b9a987','#7d0b15','#46474d','#e0323d','#a89877'];
 const J=v=>JSON.stringify(v);
 const slug=t=>t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-const catName=id=>(CATEGORIAS.find(c=>c.id===id)||{nombre:id}).nombre;
+const catName=id=>{
+  const cats=typeof CATEGORIAS!=='undefined'&&Array.isArray(CATEGORIAS)?CATEGORIAS:[];
+  return (cats.find(c=>c.id===id)||{nombre:id||'Sin categoría'}).nombre;
+};
 function td(tr,t,html){const c=document.createElement('td');if(html)c.innerHTML=t;else c.textContent=t;tr.appendChild(c);return c}
 function tabla(el,cols,rows){
   el.innerHTML='';const h=document.createElement('tr');cols.forEach(c=>{const th=document.createElement('th');th.textContent=c;h.appendChild(th)});el.appendChild(h);
@@ -474,62 +490,90 @@ function tabla(el,cols,rows){
   rows.forEach(f=>{const r=document.createElement('tr');f.forEach(x=>td(r,x[0],x[1]));el.appendChild(r)});
 }
 function renderShop(){
-  const pr=SERVICIOS.filter(s=>s.precio!=null);
-  $('sk1').textContent=SERVICIOS.length;$('sk1s').textContent=pr.length+' con precio · '+(SERVICIOS.length-pr.length)+' a cotizar';
+  const servicios=typeof SERVICIOS!=='undefined'&&Array.isArray(SERVICIOS)?SERVICIOS:[];
+  const categorias=typeof CATEGORIAS!=='undefined'&&Array.isArray(CATEGORIAS)?CATEGORIAS:[];
+  const cupones=typeof CUPONES!=='undefined'&&CUPONES&&typeof CUPONES==='object'?CUPONES:{};
+  const clientes=typeof CLIENTES!=='undefined'&&Array.isArray(CLIENTES)?CLIENTES:[];
+  if(!servicios.length&&!categorias.length&&!Object.keys(cupones).length&&!clientes.length){
+    ['sk1','sk4'].forEach(id=>$(id).textContent='0');
+    $('sk1s').textContent='No se pudieron cargar los datos';
+    $('sk2').textContent='—';$('sk3').textContent='0';
+    tabla($('tServ'),['Servicio','Categoría','Precio','Marcas'],[]);
+    tabla($('tCup'),['Código','Descuento','Disponible para'],[]);
+    tabla($('tCli'),['Nombre'],[]);
+    $('pbars').innerHTML='<div class="empty">No se pudo cargar js/datos.js. Comprueba que exista en la carpeta js/ y que el sitio esté publicado en el hosting.</div>';
+    $('sleg').innerHTML='';$('sdn').innerHTML='';
+    $('gC').innerHTML='<option value="">Datos no disponibles</option>';
+    ['oServ','oCup','oCli'].forEach(id=>$(id).textContent='');
+    return;
+  }
+  const pr=servicios.filter(s=>s.precio!=null);
+  $('sk1').textContent=servicios.length;$('sk1s').textContent=pr.length+' con precio · '+(servicios.length-pr.length)+' a cotizar';
   $('sk2').textContent=pr.length?money(pr.reduce((t,s)=>t+s.precio,0)/pr.length):'—';
-  $('sk3').textContent=Object.keys(CUPONES).length;$('sk4').textContent=CLIENTES.length;
+  $('sk3').textContent=Object.keys(cupones).length;$('sk4').textContent=clientes.length;
   // barras de precio
   const ord=pr.slice().sort((a,b)=>b.precio-a.precio),mx=ord.length?ord[0].precio:1;$('pbars').innerHTML='';
   ord.forEach(s=>{const d=document.createElement('div');d.className='bar pb';d.innerHTML='<span class="nm"></span><div class="tr"><div class="fill"></div></div><em></em>';
     d.querySelector('.nm').textContent=s.nombre;d.title=s.nombre;d.querySelector('em').textContent=money(s.precio);$('pbars').appendChild(d);
     requestAnimationFrame(()=>requestAnimationFrame(()=>d.querySelector('.fill').style.width=Math.max(3,s.precio/mx*100)+'%'))});
   // dona por categoría
-  const by={};SERVICIOS.forEach(s=>by[s.cat]=(by[s.cat]||0)+1);
+  const by={};servicios.forEach(s=>by[s.cat]=(by[s.cat]||0)+1);
   let off=0;$('sdn').innerHTML='<circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--bd)" stroke-width="5"/>';$('sleg').innerHTML='';
-  Object.entries(by).forEach(([c,v],i)=>{const p=v/SERVICIOS.length*100,col=PAL[i%PAL.length];
+  Object.entries(by).forEach(([c,v],i)=>{const p=v/servicios.length*100,col=PAL[i%PAL.length];
     $('sdn').insertAdjacentHTML('beforeend','<circle cx="21" cy="21" r="15.9" fill="none" stroke="'+col+'" stroke-width="5" stroke-dasharray="'+p+' '+(100-p)+'" stroke-dashoffset="'+(25-off)+'"/>');off+=p;
     const l=document.createElement('div');l.innerHTML='<i style="background:'+col+'"></i><span></span>';l.querySelector('span').textContent=catName(c)+' · '+v;$('sleg').appendChild(l)});
   // tablas
-  tabla($('tServ'),['Servicio','Categoría','Precio','Marcas'],SERVICIOS.map(s=>[[s.nombre],[catName(s.cat)],[s.precio==null?'Cotización':(s.desde?'desde ':'')+money(s.precio)],
+  tabla($('tServ'),['Servicio','Categoría','Precio','Marcas'],servicios.map(s=>[[s.nombre],[catName(s.cat)],[s.precio==null?'Cotización':(s.desde?'desde ':'')+money(s.precio)],
     [(s.destacado?'<span class="tg">Destacado</span>':'')+(s.popular?'<span class="tg">Popular</span>':'')||'—',1]]));
-  tabla($('tCup'),['Código','Descuento','Disponible para'],Object.entries(CUPONES).map(([k,v])=>[[k],[v.pct+'%'],[(v.clientes&&v.clientes.length)?v.clientes.join(', '):'Todos']]));
-  tabla($('tCli'),['Nombre'],CLIENTES.map(c=>[[c.nombre]]));
-  $('gC').innerHTML='';CATEGORIAS.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;$('gC').appendChild(o)});
+  tabla($('tCup'),['Código','Descuento','Disponible para'],Object.entries(cupones).map(([k,v])=>[[k],[v.pct+'%'],[(v.clientes&&v.clientes.length)?v.clientes.join(', '):'Todos']]));
+  tabla($('tCli'),['Nombre'],clientes.map(c=>[[c.nombre]]));
+  $('gC').innerHTML='';categorias.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;$('gC').appendChild(o)});
   genServ();genCup();genCli();
 }
 /* Generadores: arman la línea lista para pegar en js/datos.js */
 function genServ(){
+  const servicios=typeof SERVICIOS!=='undefined'&&Array.isArray(SERVICIOS)?SERVICIOS:[];
   const n=$('gN').value.trim(),id=slug(n)||'nuevo-servicio',p=$('gP').value.trim();
-  const sw=$('gS').value.split(',').map(x=>x.trim()).filter(Boolean);
+  const sw=[...new Set($('gS').value.split(',').map(x=>x.trim()).filter(Boolean))];
   const parts=['id:'+J(id),'cat:'+J($('gC').value),'nombre:'+J(n||'Nombre del servicio'),'precio:'+(p===''||isNaN(+p)?'null':+p)];
-  if($('gD').checked)parts.push('desde:true');
+  if($('gD').checked&&p!=='')parts.push('desde:true');
   parts.push('sw:'+J(sw),'img:""');
   if($('gDe').checked)parts.push('destacado:true');if($('gPo').checked)parts.push('popular:true');
   parts.push('desc:'+J($('gDs').value.trim()||'Descripción del servicio.'));
   $('oServ').textContent=' {'+parts.join(', ')+'},';
-  $('wServ').textContent=SERVICIOS.some(s=>s.id===id)?'⚠ Ya existe un servicio con el id «'+id+'». Cambia el nombre.':'';
+  $('wServ').textContent=(!n?'Escribe un nombre para generar el servicio.':(servicios.some(s=>s.id===id)?'⚠ Ya existe un servicio con el id «'+id+'». Cambia el nombre.':''));
 }
 function genCup(){
+  const cupones=typeof CUPONES!=='undefined'&&CUPONES&&typeof CUPONES==='object'?CUPONES:{};
   const c=$('cC').value.toUpperCase().replace(/[^A-Z0-9]/g,'')||'CODIGO',pc=Math.min(100,Math.max(1,Math.round(+$('cP').value)||1));
   const cl=$('cL').value.split(',').map(x=>x.trim()).filter(Boolean);
   $('oCup').textContent='  '+c+':{pct:'+pc+', clientes:'+J(cl)+'},';
-  $('wCup').textContent=Object.prototype.hasOwnProperty.call(CUPONES,c)?'⚠ El cupón '+c+' ya existe.':'';
+  $('wCup').textContent=($('cC').value.trim()===''?'Escribe un código para el cupón.':(Object.prototype.hasOwnProperty.call(cupones,c)?'⚠ El cupón '+c+' ya existe.':''));
 }
 function genCli(){
+  const clientes=typeof CLIENTES!=='undefined'&&Array.isArray(CLIENTES)?CLIENTES:[];
   const n=$('lN').value.trim().replace(/\s+/g,' ')||'Nombre Apellido';
   $('oCli').textContent='  {nombre:'+J(n)+'},';
-  $('wCli').textContent=CLIENTES.some(c=>c.nombre.toLowerCase()===n.toLowerCase())?'⚠ Ese cliente ya está en la lista.':'';
+  $('wCli').textContent=($('lN').value.trim()===''?'Escribe el nombre del cliente.':(clientes.some(c=>(c.nombre||'').toLowerCase()===n.toLowerCase())?'⚠ Ese cliente ya está en la lista.':''));
 }
 ['gN','gC','gP','gS','gDs','gD','gDe','gPo'].forEach(i=>{$(i).addEventListener('input',genServ);$(i).addEventListener('change',genServ)});
 ['cC','cP','cL'].forEach(i=>$(i).addEventListener('input',genCup));$('lN').addEventListener('input',genCli);
 document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{
   const t=$(b.dataset.copy).textContent,old=b.textContent;
-  try{await navigator.clipboard.writeText(t)}catch(e){const r=document.createRange();r.selectNodeContents($(b.dataset.copy));const sel=getSelection();sel.removeAllRanges();sel.addRange(r)}
+  try{
+    if(navigator.clipboard&&window.isSecureContext) await navigator.clipboard.writeText(t);
+    else throw new Error('Clipboard no disponible');
+  }catch(e){
+    const node=$(b.dataset.copy),range=document.createRange(),sel=getSelection();
+    range.selectNodeContents(node);sel.removeAllRanges();sel.addRange(range);
+    b.textContent='Seleccionado: copia con Ctrl+C';
+    return;
+  }
   b.textContent='Copiado ✓';setTimeout(()=>b.textContent=old,1400);
 });
 
 /* ---------- Reloj ---------- */
-$('k1').textContent=FILES.length;buildTree();
+$('k1').textContent='…';buildTree();
 const tick=()=>{const d=new Date();$('k4').textContent=d.toLocaleTimeString('es-CO',{hour12:false});$('date').textContent=d.toLocaleDateString('es-CO',{day:'numeric',month:'short'})};
 tick();setInterval(tick,1000);
 renderShop();apply();show('dash');filtrar();stats();

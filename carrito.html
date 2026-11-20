@@ -15,32 +15,14 @@
     scroll-behavior: smooth;
   }
 
+  /* Solo opacidad: un transform en <body> (aunque sea translateY(0) con "forwards") convierte
+     al body en el contenedor de todo lo que es position:fixed (modal, barra móvil, avisos). */
   @keyframes fadeInPage {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   body {
     animation: fadeInPage 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-
-
-  /* Corrección móvil: evita que el transform del body
-    convierta la barra fija en un elemento relativo a la página */
-  @keyframes fadeInPageMobile {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  @media (max-width: 760px) {
-    body {
-      animation: fadeInPageMobile 0.6s
-        cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-    }
   }
 
 
@@ -127,7 +109,13 @@ body.cerrando main,body.cerrando .cab,body.cerrando .barra-roja{transition:trans
 .cen p{color:var(--claro-s)}
 .barra{width:220px;height:3px;background:rgba(255,255,255,.16);margin:0 auto;border-radius:2px;overflow:hidden}
 .barra i{display:block;height:100%;width:0;background:var(--rojo-v);transition:width 1.2s linear .9s}
+.barra i{transition:width 2.3s linear .9s}
 .cierre.on .barra i{width:100%}
+.cen .est{display:flex;align-items:center;justify-content:center;gap:10px;min-height:24px}
+.cen .est p{margin:0;transition:opacity .25s}
+.cen .est.cambia p{opacity:0}
+.mini-aro{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.25);border-top-color:var(--rojo-v);animation:girar .8s linear infinite;flex:none}
+.mini-ok{color:#6fcf8a;font-weight:700;line-height:1}
 
 @media (max-width:900px){.cols{grid-template-columns:1fr}.resumen{position:static}}
 @media (max-width:760px){
@@ -200,7 +188,7 @@ body.cerrando main,body.cerrando .cab,body.cerrando .barra-roja{transition:trans
 
 <div class="cierre" id="cierre" aria-hidden="true">
   <div class="p p1"></div><div class="p p2"></div>
-  <div class="cen"><img src="img/logo-orion.png" alt=""><p>Abriendo Discord…</p><div class="barra"><i></i></div></div>
+  <div class="cen"><img src="img/logo-orion.png" alt=""><div class="est" id="c-est" role="status" aria-live="polite"><span id="c-ico" class="mini-aro" aria-hidden="true"></span><p id="c-txt">Abriendo Discord…</p></div><div class="barra"><i></i></div></div>
 </div>
 
 <script src="js/datos.js"></script>
@@ -209,6 +197,18 @@ body.cerrando main,body.cerrando .cab,body.cerrando .barra-roja{transition:trans
 <script src="js/saludo.js"></script>
 <script>
 let cuponInfo=null, puedeCerrar=false, descargada=false;
+
+// La sesión firmada por auth.js confirma que el login ya validó al cliente.
+// El carrito no vuelve a comparar el Discord ni una segunda lista de nombres.
+const sesionActual = (window.Auth && typeof Auth.usuario === "function")
+  ? Auth.usuario()
+  : null;
+
+if (sesionActual && sesionActual.rol === "Cliente") {
+  $("#nombre").value = sesionActual.nombre;
+  $("#nombre").readOnly = true;
+}
+
 const filas=()=>Carrito.get().map(l=>({p:servicio(l.id),cant:l.cant||1})).filter(f=>f.p&&f.p.precio!=null);
 
 function tot(){
@@ -220,17 +220,33 @@ function tot(){
 
 function datos(){
   const r=$("input[name=cli]:checked");
-  return {nombre:$("#nombre").value.trim(), ds:norm($("#discord").value), cli:r?r.value:""};
+  return {nombre:$("#nombre").value.trim(), ds:norm($("#discord").value), cli:r?r.value:"", sesion:sesionActual};
 }
 
-const esCliente=ds=>{
-  if(!window.CLIENTES || !Array.isArray(window.CLIENTES)) return false;
-  return window.CLIENTES.some(c => 
-    norm(c.discord) === norm(ds) || 
-    norm(c.nombre) === norm(ds) ||
-    (c.usuario && norm(c.usuario) === norm(ds))
+function normalizarCliente(valor) {
+  return String(valor || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
+function esCliente(valor) {
+  const lista = typeof CLIENTES !== "undefined" && Array.isArray(CLIENTES)
+    ? CLIENTES
+    : [];
+
+  const buscado = normalizarCliente(valor);
+
+  if (!buscado) return false;
+
+  return lista.some(c =>
+    normalizarCliente(c.nombre) === buscado ||
+    normalizarCliente(c.discord) === buscado ||
+    normalizarCliente(c.usuario) === buscado
   );
-};
+}
 
 function pintar(){
   const fs=filas(), t=tot();
@@ -254,32 +270,51 @@ $("#lista").addEventListener("click",e=>{
   Carrito.set(c.filter(x=>x.cant>0)); pintar(); Anim.observar($("#lista"));
 });
 
-/* --- LÓGICA DE CUPONES LIBRES (ORIONFREE50, ORIONFREE20, ORIONFREE5 o personalizados) --- */
+/* --- CUPONES: una sola fuente de verdad en js/datos.js --- */
 function aplicarCupon(){
   const cod=$("#cupon").value.trim().toUpperCase(), m=$("#msg-cupon");
   if(!cod){
     cuponInfo=null; m.textContent=""; m.className="err"; pintar(); return true;
   }
-  
-  let pct = 0;
-  if(cod === "ORIONFREE50") pct = 50;
-  else if(cod === "ORIONFREE20") pct = 20;
-  else if(cod === "ORIONFREE5") pct = 5;
-  else if(cod.includes("50")) pct = 50;
-  else if(cod.includes("20")) pct = 20;
-  else if(cod.includes("5")) pct = 5;
-  else {
-    // Si escribe cualquier otro cupón por defecto le asignamos 10% o le leemos si existe en CUPONES de datos.js
-    pct = (window.CUPONES && window.CUPONES[cod]) ? window.CUPONES[cod].pct : 15;
+
+  // CUPONES se declara con const en datos.js, por eso se consulta como
+  // identificador global y no mediante window.CUPONES.
+  const disponibles=(typeof CUPONES!=="undefined" && CUPONES && typeof CUPONES==="object")?CUPONES:{};
+  const cup=disponibles[cod];
+
+  if(!cup || !Number.isFinite(Number(cup.pct)) || Number(cup.pct)<1 || Number(cup.pct)>100){
+    cuponInfo=null;
+    m.textContent="El código ingresado no es válido.";
+    m.className="err";
+    pintar();
+    return false;
   }
 
-  cuponInfo = { codigo: cod, pct: pct };
-  m.textContent = "¡Cupón " + cod + " aplicado con éxito (" + pct + "% de descuento)!";
-  m.className = "err ok";
+  // Validación opcional de clientes autorizados.
+  const permitidos=Array.isArray(cup.clientes)?cup.clientes:[];
+  if(permitidos.length){
+    const discord=$("#discord") ? $("#discord").value.trim().replace(/^@/,"").toLowerCase() : "";
+    const nombre=$("#nombre") ? $("#nombre").value.trim().toLowerCase() : "";
+    const autorizado=permitidos.some(x=>{
+      const v=String(x).trim().replace(/^@/,"").toLowerCase();
+      return v && (v===discord || v===nombre);
+    });
+    if(!autorizado){
+      cuponInfo=null;
+      m.textContent="Este cupón no está habilitado para esos datos de cliente.";
+      m.className="err";
+      pintar();
+      return false;
+    }
+  }
+
+  const pct=Number(cup.pct);
+  cuponInfo={codigo:cod,pct:pct};
+  m.textContent="¡Cupón "+cod+" aplicado con éxito ("+pct+"% de descuento)!";
+  m.className="err ok";
   pintar();
   return true;
 }
-
 $("#aplicar").addEventListener("click", aplicarCupon);
 
 function err(id,msg){const i=$("#"+id);$("#e-"+id).textContent=msg;if(i&&i.tagName==="INPUT")i.setAttribute("aria-invalid",msg?"true":"false");return !msg;}
@@ -306,6 +341,7 @@ function reiniciarModal(){
 
 /* --- PASO 1: BOTÓN DE CONFIRMACIÓN PREVIO ANTES DE LA VERIFICACIÓN --- */
 function mostrarConfirmacion(d){
+  document.documentElement.style.overflow="hidden";
   puedeCerrar=true; reiniciarModal(); $("#modal").hidden=false; estado("");
   $("#m-tit").textContent="Confirmación de Compra";
   $("#m-txt").textContent="Has empezado la verificación de compra. Confirma si quieres seguir con el proceso.";
@@ -327,7 +363,13 @@ function iniciarValidacion(d){
     "Preparando factura y pasarela digital"
   ];
   
-  d.rechazo = (d.cli === "si" && !esCliente(d.ds)) || (d.cli === "si" && !esCliente(d.nombre));
+  // El login solo crea una sesión Cliente después de validar el nombre
+  // contra CLIENTES en datos.js. Aquí basta comprobar rol y nombre de sesión.
+  d.rechazo = d.cli === "si" && !(
+    d.sesion &&
+    d.sesion.rol === "Cliente" &&
+    normalizarCliente(d.nombre) === normalizarCliente(d.sesion.nombre)
+  );
   
   puedeCerrar=false; reiniciarModal(); $("#pasos").hidden=false; estado("spin");
   $("#m-tit").textContent="Procesando pedido"; $("#m-txt").textContent="Por favor, espere mientras validamos su información.";
@@ -351,7 +393,7 @@ function fin(d){
   puedeCerrar=true;
   if(d.rechazo){
     estado("x"); $("#m-tit").textContent="Verificación de cliente fallida";
-    $("#m-txt").textContent="Indicó que ya era cliente, pero no encontramos su usuario o nombre registrado en el sistema. Si es su primera vez, seleccione «No».";
+    $("#m-txt").textContent="La sesión actual no corresponde a una cuenta con rol Cliente o el nombre no coincide con la sesión. Cierre sesión e ingrese desde el login con su cuenta de cliente.";
     $("#m-acc").innerHTML='<button class="btn" type="button" id="b-volver">Volver y corregir</button>';
     $("#b-volver").onclick=cerrarModal; $("#b-volver").focus();
   } else {
@@ -359,43 +401,142 @@ function fin(d){
   }
 }
 
-function cerrarModal(){$("#modal").hidden=true;$("#nombre").focus();}
+function cerrarModal(){borrarPendiente();document.documentElement.style.overflow="";$("#modal").hidden=true;$("#nombre").focus();}
 addEventListener("keydown",e=>{if(e.key==="Escape"&&puedeCerrar&&!$("#modal").hidden)cerrarModal();});
 
-async function mostrarFactura(d){
+/* La factura en curso se guarda en sessionStorage: si la página se recarga (Live Server al guardar
+   el archivo, el navegador del móvil, etc.) el menú vuelve a abrirse con la misma factura. */
+const CLAVE_FAC="orion_factura_pendiente";
+function guardarPendiente(d,p,desc){
+  try{sessionStorage.setItem(CLAVE_FAC,JSON.stringify({d:{nombre:d.nombre,ds:d.ds,cli:d.cli},p:Object.assign({},p,{fecha:p.fecha.toISOString()}),descargada:!!desc}));}catch(e){}
+}
+function borrarPendiente(){try{sessionStorage.removeItem(CLAVE_FAC);}catch(e){}}
+
+async function mostrarFactura(d,guardado){
   const t=tot();
-  const p={numero:Factura.numero(),fecha:new Date(),nombre:d.nombre,discord:d.ds,cliente:d.cli==="si",cupon:cuponInfo?cuponInfo.codigo:null,pct:t.pct,
+  const p=guardado?Object.assign({},guardado.p,{fecha:new Date(guardado.p.fecha)}):
+    {numero:Factura.numero(),fecha:new Date(),nombre:d.nombre,discord:d.ds,cliente:d.cli==="si",cupon:cuponInfo?cuponInfo.codigo:null,pct:t.pct,
     lineas:filas().map(f=>({nombre:f.p.nombre,cant:f.cant,unitC:Math.round(f.p.precio*100),desde:!!f.p.desde})),
     subC:t.subC,descC:t.descC,totC:t.totC};
   const c=await Factura.crear(p);
-  descargada=false;
+  descargada=!!(guardado&&guardado.descargada);
+  guardarPendiente(d,p,descargada);
+  if(guardado){document.documentElement.style.overflow="hidden";puedeCerrar=true;$("#modal").hidden=false;}
   $("#caja").classList.add("ancha"); estado("ok");
   $("#m-tit").textContent="¡Validación exitosa!";
   $("#m-txt").textContent="Su orden ha sido procesada correctamente."+(d.cli==="si"?" Cuenta de cliente verificada.":"");
   $("#pasos").hidden=true;
   const f=$("#m-fac"); f.hidden=false; f.innerHTML=""; c.className="fac-prev"; c.setAttribute("role","img"); c.setAttribute("aria-label","Vista previa de la factura "+p.numero); f.appendChild(c);
   const av=$("#m-aviso"); av.hidden=false; av.className="aviso-f"; av.textContent="Debe descargar la factura para poder continuar a Discord.";
-  $("#m-acc").innerHTML='<button class="btn o" type="button" id="b-volver">Modificar</button><button class="btn" type="button" id="b-desc">Descargar factura</button><button class="btn" type="button" id="b-seguir" disabled>Continuar a Discord</button>';
+  $("#m-acc").innerHTML='<button class="btn o" type="button" id="b-volver">Modificar</button><button class="btn" type="button" id="b-desc">'+(descargada?"Descargar de nuevo":"Descargar factura")+'</button><button class="btn" type="button" id="b-seguir"'+(descargada?'':' disabled')+'>Continuar a Discord</button>';
+  if(descargada){av.className="aviso-f ok";av.textContent="Factura descargada. Ya puedes hacer clic en «Continuar a Discord».";}
   $("#b-volver").onclick=cerrarModal;
-  $("#b-desc").onclick=()=>c.toBlob(b=>{
-    if(!b){av.textContent="No se pudo generar el archivo. Intente de nuevo.";return;}
-    const u=URL.createObjectURL(b),a=document.createElement("a");
-    a.href=u;a.download="Factura-"+p.numero+".png";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);
-    descargada=true;$("#b-seguir").disabled=false;av.className="aviso-f ok";av.textContent="¡Factura descargada! Ya puede continuar a Discord.";$("#b-seguir").focus();
-  },"image/png");
-  $("#b-seguir").onclick=()=>{if(descargada)enviar(p);};
+  const botonDescarga = $("#b-desc");
+  const botonSeguir = $("#b-seguir");
+
+  botonDescarga.onclick = (evento) => {
+    evento.preventDefault();
+    evento.stopPropagation();
+    if (botonDescarga.disabled) return;
+
+    botonDescarga.disabled = true;
+    av.className = "aviso-f";
+    av.textContent = "Preparando la descarga de la factura…";
+
+    c.toBlob((blob) => {
+      if (!blob) {
+        botonDescarga.disabled = false;
+        av.textContent = "No se pudo generar el archivo. Intente de nuevo.";
+        return;
+      }
+
+      try {
+        const url = URL.createObjectURL(blob);
+        const enlace = document.createElement("a");
+        enlace.href = url;
+        enlace.download = "Factura-" + p.numero + ".png";
+        enlace.rel = "noopener";
+        enlace.style.display = "none";
+        // Evita que el clic sintético llegue a manejadores globales (app.js, saludo.js…)
+        // que traten el <a> como navegación y cierren/recarguen la página.
+        enlace.addEventListener("click", (ev) => ev.stopPropagation());
+        document.body.appendChild(enlace);
+        enlace.click();
+        
+        // Limpieza segura del enlace temporal
+        setTimeout(() => {
+          enlace.remove();
+          URL.revokeObjectURL(url);
+        }, 1000);
+
+        descargada = true;
+        guardarPendiente(d,p,true);
+        botonDescarga.textContent = "Descargar de nuevo";
+        botonDescarga.disabled = false;
+        
+        // Habilitar y enfocar inmediatamente el botón de Discord para evitar cierres falsos
+        botonSeguir.disabled = false;
+        av.className = "aviso-f ok";
+        av.textContent = "¡Factura descargada con éxito! Ya puedes hacer clic en «Continuar a Discord».";
+        botonSeguir.focus();
+
+      } catch (error) {
+        botonDescarga.disabled = false;
+        av.className = "aviso-f";
+        av.textContent = "El navegador no permitió descargar la factura. Intenta nuevamente.";
+        console.error("Error descargando factura Orion 3D:", error);
+      }
+    }, "image/png");
+  };
+
+  botonSeguir.onclick = (evento) => {
+    evento.preventDefault();
+    evento.stopPropagation();
+    if (descargada) {
+      enviar(p);
+    }
+  }; 
   $("#b-desc").focus();
 }
 
+let enviando=false;
+/* Cierra la sesión (misma que crea el login) para que haya que volver a iniciar sesión */
+function terminarSesion(){
+  try{
+    if(window.Auth&&typeof Auth.limpiar==="function") Auth.limpiar();
+    else ["usuario","sesionActiva","admin"].forEach(k=>sessionStorage.removeItem(k));
+  }catch(e){}
+}
 function enviar(p){
+  if(enviando) return; enviando=true;
+  borrarPendiente();
   try{localStorage.setItem("orion_pedido",JSON.stringify({numero:p.numero,nombre:p.nombre,discord:p.discord,total:usdC(p.totC)}));}catch(e){}
+  document.documentElement.style.overflow="";
   $("#modal").hidden=true;
   document.body.classList.add("cerrando");
   $("#cierre").classList.add("on");
-  setTimeout(()=>{Carrito.set([]);location.href=SITIO.discord;},sinMov?500:2500);
+
+  const est=$("#c-est"), ico=$("#c-ico"), txt=$("#c-txt");
+  const poner=(t,tipo)=>{
+    est.classList.add("cambia");
+    setTimeout(()=>{
+      txt.textContent=t;
+      ico.className=tipo==="ok"?"mini-ok":"mini-aro"; ico.textContent=tipo==="ok"?"✓":"";
+      est.classList.remove("cambia");
+    },sinMov?0:250);
+  };
+  /* 1) Abriendo Discord…  2) Cerrando sesión…  3) Sesión cerrada ✓  4) redirige a Discord */
+  const T=sinMov?{ses:100,fin:350,ir:700}:{ses:1900,fin:2900,ir:3500};
+  setTimeout(()=>poner("Cerrando sesión…","spin"),T.ses);
+  setTimeout(()=>{terminarSesion();Carrito.set([]);poner("Sesión cerrada","ok");},T.fin);
+  setTimeout(()=>{location.href=SITIO.discord;},T.ir);
 }
 
 pintar();
+try{
+  const g=JSON.parse(sessionStorage.getItem(CLAVE_FAC)||"null");
+  if(g&&g.p&&g.d&&filas().length) mostrarFactura(g.d,g); else borrarPendiente();
+}catch(e){borrarPendiente();}
 </script>
 </body>
 </html>

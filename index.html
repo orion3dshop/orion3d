@@ -390,14 +390,11 @@
   const card = $('card'), plant = $('plant'), btn = $('btn');
   const uIn = $('u'), pIn = $('p'), hu = $('hu'), hp = $('hp');
 
-  /* ================= LISTA DE CLIENTES AMPLIABLE =================
-     Aquí puedes agregar más nombres de clientes en el futuro. */
-  const CLIENTES_EXTRAS = [
-    { nombre: "Jhon Maldonado" },
-    { nombre: "Angel Trespalacios" }
-  ];
-  // Combinamos con los clientes que ya vengan de datos.js si existen
-  const TODOS_LOS_CLIENTES = (typeof CLIENTES !== 'undefined' ? CLIENTES : []).concat(CLIENTES_EXTRAS);
+  /* ================= LISTA ÚNICA DE CLIENTES =================
+     Los clientes se administran únicamente desde js/datos.js. */
+  const TODOS_LOS_CLIENTES = (typeof CLIENTES !== 'undefined' && Array.isArray(CLIENTES))
+    ? CLIENTES
+    : [];
 
   const ROLES = ['Cliente', 'Visitante', 'Founder'];
   const CONECTORES = ['de', 'del', 'la', 'las', 'los', 'y'];

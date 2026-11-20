@@ -80,7 +80,8 @@ document.addEventListener("click",e=>{
   const ENLACES_NAV = [
     { nombre: "Inicio", url: "home.html", clave: "home" },
     { nombre: "Servicios", url: "catalogo.html", clave: "catalogo" },
-    { nombre: "Portafolio", url: "portafolio.html", clave: "portafolio" }
+    { nombre: "Portafolio", url: "portafolio.html", clave: "portafolio" },
+    { nombre: "Pedidos", url: "pedidos.html", clave: "pedidos" }
   ];
 
   const menuHtml = ENLACES_NAV.map(item => 
@@ -112,7 +113,7 @@ document.addEventListener("click",e=>{
   
   const pie='<footer class="pie"><div class="w pie-g"><div><img src="'+SITIO.logoClaro+'" alt="'+SITIO.nombre+'"><p>Modelado 3D, animación, cursos, edición y desarrollo web.</p></div>'+
     '<div><h4>Servicios</h4><ul>'+links+'</ul></div>'+
-    '<div><h4>Sitio</h4><ul><li><a href="home.html">Inicio</a></li><li><a href="catalogo.html">Catálogo</a></li><li><a href="portafolio.html">Portafolio</a></li></ul></div>'+
+    '<div><h4>Sitio</h4><ul><li><a href="home.html">Inicio</a></li><li><a href="catalogo.html">Catálogo</a></li><li><a href="portafolio.html">Portafolio</a></li><li><a href="pedidos.html">Pedidos</a></li></ul></div>'+
     '<div><h4>Contacto</h4><ul><li><a href="'+SITIO.discord+'" target="_blank" rel="noopener">Discord</a></li><li><a href="carrito.html">Carrito</a></li><li><a href="index.html" onclick="cerrarSesion(event)">Iniciar sesión</a></li></ul></div></div>'+
     '<p class="copy">© '+SITIO.anio+' '+SITIO.nombre+'. Todos los derechos reservados.</p></footer>';
   
@@ -120,7 +121,7 @@ document.addEventListener("click",e=>{
     CORRECCIÓN CRÍTICA: Se inyecta la barra móvil (.tabs) directamente al elemento <html> o independiente 
     fuera del flujo del footer, asegurando position: fixed absoluto en la pantalla del dispositivo.
   */
-  const tabsMarkup='<nav class="tabs" aria-label="Navegación principal"><a href="home.html"'+cur("home")+'><svg class="i" aria-hidden="true"><use href="#i-home"/></svg>Inicio</a><a href="catalogo.html"'+cur("catalogo")+'><svg class="i" aria-hidden="true"><use href="#i-cat"/></svg>Catálogo</a><a href="portafolio.html"'+cur("portafolio")+'><svg class="i" aria-hidden="true"><use href="#i-por"/></svg>Portafolio</a><a class="cart" href="carrito.html"'+cur("carrito")+' aria-label="Carrito"><span class="ico"><svg class="i" aria-hidden="true"><use href="#i-carrito"/></svg><span class="n cuenta">0</span></span>Carrito</a><button id="btn-mas" aria-expanded="false" aria-controls="hoja"><svg class="i" aria-hidden="true"><use href="#i-mas"/></svg>Más</button></nav><div class="vel" id="vel"></div><div class="hoja" id="hoja" role="dialog" aria-label="Más opciones"><div class="asa"></div><a href="catalogo.html">Catálogo</a><a href="portafolio.html">Portafolio</a><a href="index.html" onclick="cerrarSesion(event)">Log out</a></div>';
+  const tabsMarkup='<nav class="tabs" aria-label="Navegación principal"><a href="home.html"'+cur("home")+'><svg class="i" aria-hidden="true"><use href="#i-home"/></svg>Inicio</a><a href="catalogo.html"'+cur("catalogo")+'><svg class="i" aria-hidden="true"><use href="#i-cat"/></svg>Catálogo</a><a href="portafolio.html"'+cur("portafolio")+'><svg class="i" aria-hidden="true"><use href="#i-por"/></svg>Portafolio</a><a class="cart" href="carrito.html"'+cur("carrito")+' aria-label="Carrito"><span class="ico"><svg class="i" aria-hidden="true"><use href="#i-carrito"/></svg><span class="n cuenta">0</span></span>Carrito</a><button id="btn-mas" aria-expanded="false" aria-controls="hoja"><svg class="i" aria-hidden="true"><use href="#i-mas"/></svg>Más</button></nav><div class="vel" id="vel"></div><div class="hoja" id="hoja" role="dialog" aria-label="Más opciones"><div class="asa"></div><a href="catalogo.html">Catálogo</a><a href="portafolio.html">Portafolio</a><a href="pedidos.html">Pedidos</a><a href="index.html" onclick="cerrarSesion(event)">Log out</a></div>';
 
   document.body.insertAdjacentHTML("afterbegin",top);
   document.body.insertAdjacentHTML("beforeend",pie);
